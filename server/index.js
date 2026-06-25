@@ -1,0 +1,65 @@
+require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+const adminRoutes = require('./routes/admin');
+const timetableRoutes = require('./routes/timetable');
+const chatRoutes = require('./routes/chat');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// ---------------------------------------------------------------------------
+// Middleware
+// ---------------------------------------------------------------------------
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
+
+app.use(express.json());
+
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
+
+app.use('/api/admin', adminRoutes);
+app.use('/api/timetable', timetableRoutes);
+app.use('/api/chat', chatRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// ---------------------------------------------------------------------------
+// Error handling middleware
+// ---------------------------------------------------------------------------
+
+// Handle multer-specific errors
+app.use((err, req, res, _next) => {
+  console.error('Unhandled error:', err);
+
+  if (err.name === 'MulterError') {
+    return res.status(400).json({ error: `File upload error: ${err.message}` });
+  }
+
+  if (err.message && err.message.includes('Only Excel files')) {
+    return res.status(400).json({ error: err.message });
+  }
+
+  return res.status(500).json({
+    error: 'Internal server error',
+    ...(process.env.NODE_ENV !== 'production' && { details: err.message }),
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Start server
+// ---------------------------------------------------------------------------
+
+app.listen(PORT, () => {
+  console.log(`🚀 Timetable Detector server running on http://localhost:${PORT}`);
+  console.log(`   Health check: http://localhost:${PORT}/api/health`);
+});
