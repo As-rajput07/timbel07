@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const adminRoutes = require('./routes/admin');
 const timetableRoutes = require('./routes/timetable');
 const chatRoutes = require('./routes/chat');
@@ -14,7 +15,7 @@ const PORT = process.env.PORT || 5000;
 // ---------------------------------------------------------------------------
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.NODE_ENV === 'production' ? true : 'http://localhost:5173',
   credentials: true,
 }));
 
@@ -31,6 +32,17 @@ app.use('/api/chat', chatRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Serve static files from the React app in production
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// The "catchall" handler: for any request that doesn't match API routes, send React's index.html
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // ---------------------------------------------------------------------------
