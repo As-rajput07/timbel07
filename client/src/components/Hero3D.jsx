@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight } from 'lucide-react';
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -271,9 +271,44 @@ function LegendBadge({ color, label }) {
 }
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
+function useTypewriter(words, typingSpeed = 100, deletingSpeed = 50, pauseDelay = 2000) {
+  const [wordIndex, setWordIndex] = useState(0);
+  const [text, setText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentWord = words[wordIndex];
+    let timer;
+
+    if (isDeleting) {
+      if (text === "") {
+        setIsDeleting(false);
+        setWordIndex((prev) => (prev + 1) % words.length);
+      } else {
+        timer = setTimeout(() => {
+          setText(currentWord.substring(0, text.length - 1));
+        }, deletingSpeed);
+      }
+    } else {
+      if (text === currentWord) {
+        timer = setTimeout(() => setIsDeleting(true), pauseDelay);
+      } else {
+        timer = setTimeout(() => {
+          setText(currentWord.substring(0, text.length + 1));
+        }, typingSpeed);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [text, isDeleting, wordIndex, words, typingSpeed, deletingSpeed, pauseDelay]);
+
+  return text;
+}
+
 export default function Hero3D() {
   const mouseRef     = useRef({ x: 0, y: 0 });
   const containerRef = useRef();
+  const typedText = useTypewriter(["free classes.", "teacher status.", "time table."]);
 
   const handleMouseMove = (e) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -347,17 +382,18 @@ export default function Hero3D() {
             lineHeight: 1.1,
             color: "#f8fafc",
             letterSpacing: "-0.03em",
-            fontFamily: "'Plus Jakarta Sans', sans-serif"
+            fontFamily: "'Inter', sans-serif"
           }}>
-            No more roaming.<br />
+            Only one click,<br />
+            Find{" "}
             <span style={{
               background: "linear-gradient(90deg, #a5b4fc 0%, #635BFF 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}>
-              Find a free room.
-            </span>
+              {typedText}
+            </span><span className="animate-pulse" style={{ color: "#635BFF" }}>|</span>
           </h1>
 
           {/* Subtext */}
