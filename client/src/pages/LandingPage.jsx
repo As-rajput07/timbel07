@@ -537,6 +537,49 @@ export default function LandingPage() {
       
       <Hero3D />
 
+      {/* ── 🎬 Demo Video Showcase ── */}
+      <section style={{ padding: '40px 24px 40px', position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'center' }}>
+        <div style={{
+          width: '100%',
+          maxWidth: 1040,
+          background: 'rgba(15,23,42,0.6)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(99,91,255,0.25)',
+          borderRadius: 24,
+          padding: 12,
+          boxShadow: '0 40px 100px rgba(0,0,0,0.8), 0 0 40px rgba(99,91,255,0.1)',
+          transform: 'translateY(-20px)',
+        }}>
+          {/* Mac-like Browser Dots */}
+          <div style={{ display: 'flex', gap: 6, padding: '8px 12px 16px' }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#EF4444' }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F59E0B' }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981' }} />
+          </div>
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            aspectRatio: '16/9',
+            borderRadius: 12,
+            overflow: 'hidden',
+            background: '#060C20',
+            border: '1px solid rgba(51,65,85,0.5)'
+          }}>
+            <video 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              controls
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            >
+              <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782496099/SaaS_Launch_Video_Browser_Window_Showcase_qporwb.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </section>
+
       {/* ── 3D Tilting App Mockup (from original design) ── */}
       <section ref={ref} style={{ padding: '80px 24px 100px', position: 'relative', background: 'transparent', overflow: 'hidden' }}>
         {/* ── Background: radial mesh + grid ── */}
@@ -668,6 +711,31 @@ export default function LandingPage() {
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,91,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(99,91,255,0.4)' }}>
                 <Users size={16} /> Explore Cosen <ArrowRight size={16} />
               </a>
+
+              {/* ── Secondary Demo Video ── */}
+              <div style={{
+                marginTop: 48,
+                position: 'relative',
+                width: '100%',
+                aspectRatio: '16/9',
+                borderRadius: 16,
+                overflow: 'hidden',
+                background: '#060C20',
+                border: '1px solid rgba(51,65,85,0.5)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+              }}>
+                <video 
+                  autoPlay 
+                  muted 
+                  loop 
+                  playsInline
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                >
+                  <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782495939/3D_Mobile_App_Character_Showcase_z2zt4f.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+
             </div>
           </div>
         </div>
