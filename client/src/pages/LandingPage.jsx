@@ -570,8 +570,7 @@ export default function LandingPage() {
               muted 
               loop 
               playsInline
-              controls
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
             >
               <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782496099/SaaS_Launch_Video_Browser_Window_Showcase_qporwb.mp4" type="video/mp4" />
               Your browser does not support the video tag.
@@ -729,7 +728,7 @@ export default function LandingPage() {
                   muted 
                   loop 
                   playsInline
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
                 >
                   <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782495939/3D_Mobile_App_Character_Showcase_z2zt4f.mp4" type="video/mp4" />
                   Your browser does not support the video tag.
