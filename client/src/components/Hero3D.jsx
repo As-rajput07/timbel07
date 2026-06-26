@@ -386,14 +386,17 @@ export default function Hero3D() {
           }}>
             Only one click,<br />
             Find{" "}
-            <span style={{
-              background: "linear-gradient(90deg, #a5b4fc 0%, #635BFF 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}>
-              {typedText}
-            </span><span className="animate-pulse" style={{ color: "#635BFF" }}>|</span>
+            <span style={{ whiteSpace: "nowrap" }}>
+              <span style={{
+                background: "linear-gradient(90deg, #a5b4fc 0%, #635BFF 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                {typedText}
+              </span>
+              <span className="animate-pulse" style={{ color: "#635BFF" }}>|</span>
+            </span>
           </h1>
 
           {/* Subtext */}
