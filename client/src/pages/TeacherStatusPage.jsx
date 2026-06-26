@@ -107,7 +107,7 @@ export default function TeacherStatusPage() {
       <div className="relative z-10 pt-24 px-4 max-w-5xl mx-auto">
         
         {/* Header */}
-        <div className="text-center mb-12 glass-card rounded-3xl border border-violet-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full relative overflow-hidden transition-all duration-500" style={{ aspectRatio: '16/9', minHeight: 280 }}>
+        <div className="text-center mb-12 glass-card rounded-3xl border border-violet-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full relative overflow-hidden transition-all duration-500 aspect-video flex items-center justify-center">
           
           {/* Video Layer */}
           <div className={`absolute inset-0 transition-opacity duration-700 bg-slate-darker ${showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
@@ -125,14 +125,14 @@ export default function TeacherStatusPage() {
           </div>
 
           {/* Text Layer */}
-          <div className={`p-8 relative w-full h-full flex flex-col justify-center items-center transition-opacity duration-700 ${!showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none absolute inset-0'}`}>
-            <p className="text-violet-primary text-sm font-bold tracking-[0.2em] uppercase mb-4 drop-shadow-md">
+          <div className={`px-6 py-6 md:px-8 md:py-8 relative w-full h-full flex flex-col justify-center items-center transition-opacity duration-700 ${!showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none absolute inset-0'}`}>
+            <p className="text-violet-primary text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-2 md:mb-4 drop-shadow-md">
               Faculty Directory
             </p>
-            <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-text-primary mb-6 drop-shadow-lg">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold text-text-primary mb-3 md:mb-6 drop-shadow-lg">
               Teacher <span className="gradient-text">Status</span>
             </h1>
-            <p className="text-text-muted max-w-xl mx-auto text-lg leading-relaxed drop-shadow">
+            <p className="text-text-muted max-w-xl mx-auto text-sm md:text-lg leading-relaxed drop-shadow">
               Search for any faculty member to see their real-time availability, current location, and full daily schedule.
             </p>
           </div>

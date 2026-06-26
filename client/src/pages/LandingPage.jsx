@@ -712,11 +712,10 @@ export default function LandingPage() {
               </a>
 
               {/* ── Secondary Demo Video ── */}
-              <div style={{
+              <div id="secondary-demo-video" style={{
                 marginTop: 48,
                 position: 'relative',
                 width: '100%',
-                aspectRatio: '16/9',
                 borderRadius: 16,
                 overflow: 'hidden',
                 background: '#060C20',
@@ -728,7 +727,7 @@ export default function LandingPage() {
                   muted 
                   loop 
                   playsInline
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                  style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
                 >
                   <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782495939/3D_Mobile_App_Character_Showcase_z2zt4f.mp4" type="video/mp4" />
                   Your browser does not support the video tag.
