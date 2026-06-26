@@ -20,6 +20,18 @@ export default function TeacherStatusPage() {
   const [teacherData, setTeacherData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  
+  const [showVideo, setShowVideo] = useState(true)
+
+  useEffect(() => {
+    let timer;
+    if (!showVideo) {
+      timer = setTimeout(() => {
+        setShowVideo(true)
+      }, 4000)
+    }
+    return () => clearTimeout(timer)
+  }, [showVideo])
 
   // Fetch teacher list on mount
   useEffect(() => {
@@ -95,16 +107,35 @@ export default function TeacherStatusPage() {
       <div className="relative z-10 pt-24 px-4 max-w-5xl mx-auto">
         
         {/* Header */}
-        <div className="text-center mb-12 glass-card p-8 rounded-3xl border border-violet-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-          <p className="text-violet-primary text-sm font-bold tracking-[0.2em] uppercase mb-4">
-            Faculty Directory
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-text-primary mb-6">
-            Teacher <span className="gradient-text">Status</span>
-          </h1>
-          <p className="text-text-muted max-w-xl mx-auto text-lg leading-relaxed">
-            Search for any faculty member to see their real-time availability, current location, and full daily schedule.
-          </p>
+        <div className="text-center mb-12 glass-card rounded-3xl border border-violet-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] w-full relative overflow-hidden transition-all duration-500" style={{ aspectRatio: '16/9', minHeight: 280 }}>
+          
+          {/* Video Layer */}
+          <div className={`absolute inset-0 transition-opacity duration-700 bg-slate-darker ${showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+            {showVideo && (
+              <video 
+                autoPlay 
+                muted 
+                playsInline
+                onEnded={() => setShowVideo(false)}
+                className="w-full h-full object-cover opacity-80"
+              >
+                <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782495939/3D_Mobile_App_Character_Showcase_z2zt4f.mp4" type="video/mp4" />
+              </video>
+            )}
+          </div>
+
+          {/* Text Layer */}
+          <div className={`p-8 relative w-full h-full flex flex-col justify-center items-center transition-opacity duration-700 ${!showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none absolute inset-0'}`}>
+            <p className="text-violet-primary text-sm font-bold tracking-[0.2em] uppercase mb-4 drop-shadow-md">
+              Faculty Directory
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-text-primary mb-6 drop-shadow-lg">
+              Teacher <span className="gradient-text">Status</span>
+            </h1>
+            <p className="text-text-muted max-w-xl mx-auto text-lg leading-relaxed drop-shadow">
+              Search for any faculty member to see their real-time availability, current location, and full daily schedule.
+            </p>
+          </div>
         </div>
 
         {/* Controls Card */}

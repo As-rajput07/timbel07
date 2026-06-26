@@ -17,6 +17,17 @@ export default function ClassTimetablePage() {
   const [error, setError] = useState('')
 
   const [selectedDay, setSelectedDay] = useState('ALL')
+  const [showVideo, setShowVideo] = useState(true)
+
+  useEffect(() => {
+    let timer;
+    if (!showVideo) {
+      timer = setTimeout(() => {
+        setShowVideo(true)
+      }, 4000)
+    }
+    return () => clearTimeout(timer)
+  }, [showVideo])
 
   useEffect(() => {
     fetch('/api/timetable/classes')
@@ -74,16 +85,34 @@ export default function ClassTimetablePage() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-violet-primary/20 rounded-full blur-[120px] pointer-events-none z-0" />
       
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-16 relative z-10 flex flex-col items-center">
-        <div className="text-center mb-12 glass-card px-10 py-8 rounded-3xl border-violet-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] max-w-2xl">
-          <p className="text-violet-primary text-sm font-bold tracking-[0.2em] uppercase mb-4 drop-shadow-md">
-            Weekly Schedule
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-text-primary mb-6 drop-shadow-lg">
-            Class <span className="gradient-text">Timetables</span>
-          </h1>
-          <p className="text-text-muted text-lg leading-relaxed drop-shadow">
-            Select your class code below to instantly view your entire weekly schedule, including subjects, rooms, and teachers.
-          </p>
+        <div className="text-center mb-12 glass-card rounded-3xl border-violet-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] max-w-2xl w-full relative overflow-hidden transition-all duration-500" style={{ aspectRatio: '16/9', minHeight: 280 }}>
+          {/* Video Layer */}
+          <div className={`absolute inset-0 transition-opacity duration-700 bg-slate-darker ${showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+            {showVideo && (
+              <video 
+                autoPlay 
+                muted 
+                playsInline
+                onEnded={() => setShowVideo(false)}
+                className="w-full h-full object-cover opacity-80"
+              >
+                <source src="https://res.cloudinary.com/dga14nmzn/video/upload/v1782496099/SaaS_Launch_Video_Browser_Window_Showcase_qporwb.mp4" type="video/mp4" />
+              </video>
+            )}
+          </div>
+
+          {/* Text Layer */}
+          <div className={`px-10 py-8 relative w-full h-full flex flex-col justify-center transition-opacity duration-700 ${!showVideo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none absolute inset-0'}`}>
+            <p className="text-violet-primary text-sm font-bold tracking-[0.2em] uppercase mb-4 drop-shadow-md">
+              Weekly Schedule
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-text-primary mb-6 drop-shadow-lg">
+              Class <span className="gradient-text">Timetables</span>
+            </h1>
+            <p className="text-text-muted text-lg leading-relaxed drop-shadow">
+              Select your class code below to instantly view your entire weekly schedule, including subjects, rooms, and teachers.
+            </p>
+          </div>
         </div>
 
         {/* Dropdown Section */}
