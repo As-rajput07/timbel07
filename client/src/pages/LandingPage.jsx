@@ -663,10 +663,10 @@ export default function LandingPage() {
               <p style={{ fontSize: 15, color: '#94A3B8', lineHeight: 1.7, maxWidth: 460, margin: '0 auto 30px' }}>
                 Timetable Detector is a proud utility born from <strong style={{ color: '#F8FAFC' }}>Cosen</strong> — the ultimate campus peer-to-peer platform connecting students for resources, buy/sell, and now finding free spaces.
               </p>
-              <a href="https://cosen.online" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 26px', border: '1px solid rgba(99,91,255,0.35)', color: '#635BFF', borderRadius: 12, fontWeight: 600, fontSize: 14, textDecoration: 'none', transition: 'all 0.25s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,91,255,0.1)'; e.currentTarget.style.borderColor = '#635BFF' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(99,91,255,0.35)' }}>
-                <Users size={15} /> Explore Cosen <ArrowRight size={14} />
+              <a href="https://cosen.online" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', border: '1px solid rgba(99,91,255,0.4)', color: '#F8FAFC', background: 'rgba(99,91,255,0.1)', borderRadius: 999, fontWeight: 500, fontSize: 15, textDecoration: 'none', transition: 'all 0.25s ease', letterSpacing: '-0.02em' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,91,255,0.2)'; e.currentTarget.style.borderColor = '#7C75FF' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,91,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(99,91,255,0.4)' }}>
+                <Users size={16} /> Explore Cosen <ArrowRight size={16} />
               </a>
             </div>
           </div>
@@ -685,9 +685,9 @@ export default function LandingPage() {
           <p style={{ fontSize: 16, color: '#64748B', marginBottom: 40 }}>1,797 class slots tracked. Open right now.</p>
           <Link
             to="/finder"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 44px', background: 'linear-gradient(135deg, #635BFF, #7C75FF)', color: '#fff', borderRadius: 16, fontWeight: 800, fontSize: 16, textDecoration: 'none', boxShadow: '0 0 60px rgba(99,91,255,0.4)', transition: 'all 0.25s ease', letterSpacing: '-0.01em' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 0 80px rgba(99,91,255,0.55)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 0 60px rgba(99,91,255,0.4)' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', background: '#635BFF', color: '#fff', borderRadius: 999, fontWeight: 600, fontSize: 16, textDecoration: 'none', boxShadow: '0 8px 30px rgba(99,91,255,0.25)', transition: 'all 0.25s ease', letterSpacing: '-0.02em' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(99,91,255,0.4)'; e.currentTarget.style.background = '#7C75FF' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,91,255,0.25)'; e.currentTarget.style.background = '#635BFF' }}
           >
             <Zap size={18} /> Find a Free Room Now <ArrowRight size={18} />
           </Link>

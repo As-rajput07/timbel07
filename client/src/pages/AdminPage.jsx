@@ -234,7 +234,7 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 rounded-lg bg-violet-primary hover:bg-violet-hover text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+              className="w-full py-3 px-6 rounded-full bg-violet-primary hover:bg-violet-hover text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
             >
               {loading ? <Lottie animationData={loaderAnimation} className="w-6 h-6" /> : 'Authenticate'}
             </button>
@@ -317,7 +317,7 @@ export default function AdminPage() {
                   <button
                     onClick={handleUpload}
                     disabled={uploadStatus === 'uploading'}
-                    className="px-8 py-3 rounded-lg bg-emerald-free hover:bg-[#0EA5E9] hover:bg-emerald-free/90 text-white font-medium transition-colors disabled:opacity-50 flex items-center gap-2 mx-auto"
+                    className="px-8 py-3 rounded-full bg-emerald-free hover:bg-[#0EA5E9] hover:bg-emerald-free/90 text-white font-medium transition-colors disabled:opacity-50 flex items-center gap-2 mx-auto"
                   >
                     {uploadStatus === 'uploading' ? (
                       <><Lottie animationData={loaderAnimation} className="w-6 h-6" /> Processing...</>
@@ -361,7 +361,7 @@ export default function AdminPage() {
               <button
                 onClick={handleAnalyze}
                 disabled={analyzing || issues.filter(i => i.status === 'pending').length === 0}
-                className="px-6 py-3 rounded-xl bg-violet-primary hover:bg-violet-600 text-white font-medium transition-colors disabled:opacity-50 flex items-center gap-2 shrink-0"
+                className="px-8 py-3 rounded-full bg-violet-primary hover:bg-violet-600 text-white font-medium transition-colors disabled:opacity-50 flex items-center gap-2 shrink-0"
               >
                 {analyzing ? <Lottie animationData={loaderAnimation} className="w-6 h-6" /> : <Lottie animationData={assistantAnimation} className="w-6 h-6" />}
                 Analyze Queries
