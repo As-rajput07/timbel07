@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Shield, Upload, CheckCircle, AlertCircle, MessageSquare, Check } from 'lucide-react'
+import { Shield, Upload, CheckCircle, AlertCircle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search } from 'lucide-react'
 import LottieLib from 'lottie-react'
 import ReactMarkdown from 'react-markdown'
 import assistantAnimation from '../assets/assistent.json'
@@ -19,7 +19,7 @@ export default function AdminPage() {
   const fileInputRef = useRef(null)
 
   // AI Resolve Queries State
-  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'queries'
+  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'add-slot' | 'manage-slots' | 'queries'
   const [issues, setIssues] = useState([])
   const [loadingIssues, setLoadingIssues] = useState(false)
   const [aiAnalysis, setAiAnalysis] = useState('')
@@ -28,11 +28,123 @@ export default function AdminPage() {
   const [clearing, setClearing] = useState(false)
   const [applying, setApplying] = useState(false)
 
+  // Add Slot State
+  const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+  const SESSION_TYPES = ['LEC', 'LAB', 'TUT', 'EXAM']
+  const emptySlotForm = {
+    building: '', room: '', subject: '', teacher: '',
+    day: 'MON', start_time: '', end_time: '',
+    session_type: 'LEC', class_code: '', section: '',
+    program: '', year: ''
+  }
+  const [slotForm, setSlotForm] = useState(emptySlotForm)
+  const [metadata, setMetadata] = useState({ subjects: [], teachers: [], buildings: [], classCodes: [] })
+  const [metaLoading, setMetaLoading] = useState(false)
+  const [subjectSearch, setSubjectSearch] = useState('')
+  const [teacherSearch, setTeacherSearch] = useState('')
+  const [showSubjectDrop, setShowSubjectDrop] = useState(false)
+  const [showTeacherDrop, setShowTeacherDrop] = useState(false)
+  const [showClassCodeDrop, setShowClassCodeDrop] = useState(false)
+  const [classCodeSearch, setClassCodeSearch] = useState('')
+  const [showBuildingDrop, setShowBuildingDrop] = useState(false)
+  const [buildingSearch, setBuildingSearch] = useState('')
+  const [showDayDrop, setShowDayDrop] = useState(false)
+  const [showSessionDrop, setShowSessionDrop] = useState(false)
+  const [addSlotStatus, setAddSlotStatus] = useState(null) // null | 'loading' | 'success' | 'error'
+  const [addSlotMsg, setAddSlotMsg] = useState('')
+  const [recentSlots, setRecentSlots] = useState([])
+
+  // Manage Slots State
+  const [manageSearch, setManageSearch] = useState({ building: '', room: '', day: '' })
+  const [manageBuildingSearch, setManageBuildingSearch] = useState('')
+  const [showManageBuildingDrop, setShowManageBuildingDrop] = useState(false)
+  const [showManageDayDrop, setShowManageDayDrop] = useState(false)
+  const [manageResults, setManageResults] = useState([])
+  const [manageLoading, setManageLoading] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
   useEffect(() => {
-    if (token && activeTab === 'queries') {
-      fetchIssues()
-    }
+    if (token && activeTab === 'queries') fetchIssues()
+    if (token && (activeTab === 'add-slot' || activeTab === 'manage-slots') && metadata.subjects.length === 0) fetchMetadata()
   }, [token, activeTab])
+
+  const fetchMetadata = async () => {
+    setMetaLoading(true)
+    try {
+      const res = await fetch('/api/admin/slot-metadata', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (res.ok) setMetadata(data)
+    } catch (err) { console.error(err) }
+    finally { setMetaLoading(false) }
+  }
+
+  const handleManageSearch = async (e) => {
+    if (e) e.preventDefault()
+    setManageLoading(true)
+    setManageResults([])
+    setDeleteConfirmId(null)
+    try {
+      const params = new URLSearchParams()
+      if (manageSearch.building) params.append('building', manageSearch.building)
+      if (manageSearch.room) params.append('room', manageSearch.room)
+      if (manageSearch.day) params.append('day', manageSearch.day)
+
+      const res = await fetch(`/api/admin/search-slots?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (res.ok) setManageResults(data.slots)
+    } catch (err) { console.error(err) }
+    finally { setManageLoading(false) }
+  }
+
+  const handleDeleteSlot = async (id) => {
+    setDeleteLoading(true)
+    try {
+      const res = await fetch(`/api/admin/slots/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.ok) {
+        setManageResults(prev => prev.filter(s => s.id !== id))
+        setDeleteConfirmId(null)
+      }
+    } catch (err) { console.error(err) }
+    finally { setDeleteLoading(false) }
+  }
+
+  const handleSlotFormChange = (field, value) => {
+    setSlotForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleAddSlot = async (e) => {
+    e.preventDefault()
+    setAddSlotStatus('loading')
+    setAddSlotMsg('')
+    try {
+      const res = await fetch('/api/admin/add-slot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(slotForm)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to add slot')
+      setAddSlotStatus('success')
+      setAddSlotMsg(`Slot added: ${slotForm.room} | ${slotForm.subject} | ${slotForm.day} ${slotForm.start_time}-${slotForm.end_time}`)
+      setRecentSlots(prev => [{ ...slotForm, id: data.slot?.id }, ...prev.slice(0, 4)])
+      setSlotForm(emptySlotForm)
+      setSubjectSearch('')
+      setTeacherSearch('')
+      setClassCodeSearch('')
+      setBuildingSearch('')
+    } catch (err) {
+      setAddSlotStatus('error')
+      setAddSlotMsg(err.message)
+    }
+  }
 
   const fetchIssues = async () => {
     setLoadingIssues(true)
@@ -263,15 +375,27 @@ export default function AdminPage() {
           </button>
         </div>
 
-        <div className="flex border-b border-slate-border mb-6">
+        <div className="flex border-b border-slate-border mb-6 overflow-x-auto">
           <button
-            className={`px-6 py-3 font-semibold text-sm transition-colors ${activeTab === 'upload' ? 'border-b-2 border-violet-primary text-violet-primary' : 'text-text-muted hover:text-text-primary'}`}
+            className={`px-5 py-3 font-semibold text-sm transition-colors whitespace-nowrap ${activeTab === 'upload' ? 'border-b-2 border-violet-primary text-violet-primary' : 'text-text-muted hover:text-text-primary'}`}
             onClick={() => setActiveTab('upload')}
           >
             Upload Data
           </button>
           <button
-            className={`px-6 py-3 font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === 'queries' ? 'border-b-2 border-violet-primary text-violet-primary' : 'text-text-muted hover:text-text-primary'}`}
+            className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'add-slot' ? 'border-b-2 border-emerald-free text-emerald-free' : 'text-text-muted hover:text-text-primary'}`}
+            onClick={() => setActiveTab('add-slot')}
+          >
+            <PlusCircle size={15} /> Add Slot
+          </button>
+          <button
+            className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'manage-slots' ? 'border-b-2 border-red-busy text-red-busy' : 'text-text-muted hover:text-text-primary'}`}
+            onClick={() => setActiveTab('manage-slots')}
+          >
+            <Trash2 size={15} /> Manage Slots
+          </button>
+          <button
+            className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'queries' ? 'border-b-2 border-violet-primary text-violet-primary' : 'text-text-muted hover:text-text-primary'}`}
             onClick={() => setActiveTab('queries')}
           >
             Resolve Queries <span className="bg-red-busy text-white text-[10px] px-2 py-0.5 rounded-full">{issues.length > 0 ? issues.length : 0}</span>
@@ -346,6 +470,543 @@ export default function AdminPage() {
                   <h4 className="text-sm font-semibold text-red-busy">Upload Failed</h4>
                   <p className="text-sm text-red-busy/80 mt-1">{uploadMessage}</p>
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════ ADD SLOT TAB ══════════ */}
+        {activeTab === 'add-slot' && (
+          <div className="space-y-6">
+            {metaLoading ? (
+              <div className="flex justify-center p-12"><Lottie animationData={loaderAnimation} className="w-12 h-12" /></div>
+            ) : (
+              <form onSubmit={handleAddSlot} className="glass-card p-6 md:p-8 space-y-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-free/10 flex items-center justify-center">
+                    <PlusCircle className="text-emerald-free" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-text-primary text-lg">Add New Slot</h3>
+                    <p className="text-text-muted text-sm">Fill all fields. Data will be live immediately.</p>
+                  </div>
+                </div>
+
+                {/* Row 1: Building + Room */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Building — Searchable Dropdown */}
+                  <div className="relative">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Building Type *</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search building (e.g. B, NB, C)..."
+                        value={buildingSearch || slotForm.building}
+                        onChange={e => { setBuildingSearch(e.target.value); handleSlotFormChange('building', e.target.value); setShowBuildingDrop(true) }}
+                        onFocus={() => setShowBuildingDrop(true)}
+                        onBlur={() => setTimeout(() => setShowBuildingDrop(false), 200)}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors pr-10"
+                        required
+                      />
+                      <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    </div>
+                    {showBuildingDrop && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+                        {(metadata.buildings.length > 0 ? metadata.buildings : ['A','B','C','D','E','F','G','NB','BX','I'])
+                          .filter(b => b.toLowerCase().includes((buildingSearch || slotForm.building).toLowerCase()))
+                          .map((b, i) => (
+                            <div
+                              key={i}
+                              className="px-4 py-2.5 hover:bg-slate-deeper cursor-pointer text-text-primary text-sm border-b border-slate-border/40 last:border-0 flex items-center gap-3"
+                              onMouseDown={() => { handleSlotFormChange('building', b); setBuildingSearch(''); setShowBuildingDrop(false) }}
+                            >
+                              <span className="w-8 h-8 rounded-lg bg-violet-primary/10 text-violet-primary flex items-center justify-center font-bold text-xs shrink-0">{b}</span>
+                              <span>Block {b}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Classroom / Room No. *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. B012, C013, I007"
+                      value={slotForm.room}
+                      onChange={e => handleSlotFormChange('room', e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Subject (searchable) */}
+                <div className="relative">
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Subject Name *</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search or type subject name..."
+                      value={subjectSearch || slotForm.subject}
+                      onChange={e => { setSubjectSearch(e.target.value); handleSlotFormChange('subject', e.target.value); setShowSubjectDrop(true) }}
+                      onFocus={() => setShowSubjectDrop(true)}
+                      onBlur={() => setTimeout(() => setShowSubjectDrop(false), 200)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors pr-10"
+                      required
+                    />
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                  </div>
+                  {showSubjectDrop && metadata.subjects.filter(s => s.toLowerCase().includes((subjectSearch || slotForm.subject).toLowerCase())).length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto">
+                      {metadata.subjects
+                        .filter(s => s.toLowerCase().includes((subjectSearch || slotForm.subject).toLowerCase()))
+                        .map((s, i) => (
+                          <div
+                            key={i}
+                            className="px-4 py-2.5 hover:bg-slate-deeper cursor-pointer text-text-primary text-sm border-b border-slate-border/40 last:border-0"
+                            onMouseDown={() => { handleSlotFormChange('subject', s); setSubjectSearch(''); setShowSubjectDrop(false) }}
+                          >
+                            {s}
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+
+                {/* Row 3: Teacher (searchable) */}
+                <div className="relative">
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Teacher Name *</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search or type teacher name..."
+                      value={teacherSearch || slotForm.teacher}
+                      onChange={e => { setTeacherSearch(e.target.value); handleSlotFormChange('teacher', e.target.value); setShowTeacherDrop(true) }}
+                      onFocus={() => setShowTeacherDrop(true)}
+                      onBlur={() => setTimeout(() => setShowTeacherDrop(false), 200)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors pr-10"
+                      required
+                    />
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                  </div>
+                  {showTeacherDrop && metadata.teachers.filter(t => t.toLowerCase().includes((teacherSearch || slotForm.teacher).toLowerCase())).length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto">
+                      {metadata.teachers
+                        .filter(t => t.toLowerCase().includes((teacherSearch || slotForm.teacher).toLowerCase()))
+                        .map((t, i) => (
+                          <div
+                            key={i}
+                            className="px-4 py-2.5 hover:bg-slate-deeper cursor-pointer text-text-primary text-sm border-b border-slate-border/40 last:border-0"
+                            onMouseDown={() => { handleSlotFormChange('teacher', t); setTeacherSearch(''); setShowTeacherDrop(false) }}
+                          >
+                            {t}
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+
+                {/* Row 4: Day + Session Type */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Day — Searchable Dropdown */}
+                  <div className="relative">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Day *</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={slotForm.day}
+                        onFocus={() => setShowDayDrop(true)}
+                        onBlur={() => setTimeout(() => setShowDayDrop(false), 200)}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary cursor-pointer focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors pr-10"
+                        required
+                      />
+                      <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    </div>
+                    {showDayDrop && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 overflow-hidden">
+                        {DAYS.map((d, i) => (
+                          <div
+                            key={i}
+                            className={`px-4 py-2.5 cursor-pointer text-sm border-b border-slate-border/40 last:border-0 flex items-center gap-3 transition-colors ${
+                              slotForm.day === d ? 'bg-emerald-free/10 text-emerald-free font-semibold' : 'hover:bg-slate-deeper text-text-primary'
+                            }`}
+                            onMouseDown={() => { handleSlotFormChange('day', d); setShowDayDrop(false) }}
+                          >
+                            {d}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Session Type — Searchable Dropdown */}
+                  <div className="relative">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Session Type</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={slotForm.session_type}
+                        onFocus={() => setShowSessionDrop(true)}
+                        onBlur={() => setTimeout(() => setShowSessionDrop(false), 200)}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary cursor-pointer focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors pr-10"
+                      />
+                      <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    </div>
+                    {showSessionDrop && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 overflow-hidden">
+                        {SESSION_TYPES.map((s, i) => (
+                          <div
+                            key={i}
+                            className={`px-4 py-2.5 cursor-pointer text-sm border-b border-slate-border/40 last:border-0 transition-colors ${
+                              slotForm.session_type === s ? 'bg-emerald-free/10 text-emerald-free font-semibold' : 'hover:bg-slate-deeper text-text-primary'
+                            }`}
+                            onMouseDown={() => { handleSlotFormChange('session_type', s); setShowSessionDrop(false) }}
+                          >
+                            {s}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Row 5: Start Time + End Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Start Time *</label>
+                    <input
+                      type="time"
+                      value={slotForm.start_time}
+                      onChange={e => handleSlotFormChange('start_time', e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary focus:outline-none focus:border-emerald-free transition-colors"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">End Time *</label>
+                    <input
+                      type="time"
+                      value={slotForm.end_time}
+                      onChange={e => handleSlotFormChange('end_time', e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary focus:outline-none focus:border-emerald-free transition-colors"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Row 6: Class Code + Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Class Code — Searchable Dropdown */}
+                  <div className="relative">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Class Code</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="e.g. BE-CS, BCA-A"
+                        value={classCodeSearch || slotForm.class_code}
+                        onChange={e => { setClassCodeSearch(e.target.value); handleSlotFormChange('class_code', e.target.value); setShowClassCodeDrop(true) }}
+                        onFocus={() => setShowClassCodeDrop(true)}
+                        onBlur={() => setTimeout(() => setShowClassCodeDrop(false), 200)}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free focus:ring-1 focus:ring-emerald-free transition-colors pr-10"
+                      />
+                      <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    </div>
+                    {showClassCodeDrop && metadata.classCodes.filter(c => c.toLowerCase().includes((classCodeSearch || slotForm.class_code).toLowerCase())).length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+                        {metadata.classCodes
+                          .filter(c => c.toLowerCase().includes((classCodeSearch || slotForm.class_code).toLowerCase()))
+                          .map((c, i) => (
+                            <div
+                              key={i}
+                              className="px-4 py-2.5 hover:bg-slate-deeper cursor-pointer text-text-primary text-sm border-b border-slate-border/40 last:border-0"
+                              onMouseDown={() => { handleSlotFormChange('class_code', c); setClassCodeSearch(''); setShowClassCodeDrop(false) }}
+                            >
+                              {c}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Section</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. A, B, C"
+                      value={slotForm.section}
+                      onChange={e => handleSlotFormChange('section', e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Year</label>
+                    <input
+                      type="number"
+                      min="1" max="4"
+                      placeholder="1-4"
+                      value={slotForm.year}
+                      onChange={e => handleSlotFormChange('year', e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 7: Program */}
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Program</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. BE, BCA, MCA"
+                    value={slotForm.program}
+                    onChange={e => handleSlotFormChange('program', e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-emerald-free transition-colors"
+                  />
+                </div>
+
+                {/* Status Messages */}
+                {addSlotStatus === 'success' && (
+                  <div className="p-4 rounded-xl bg-emerald-free/10 border border-emerald-free/30 flex items-start gap-3">
+                    <CheckCircle className="text-emerald-free shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-emerald-free font-semibold text-sm">Slot Added Successfully!</p>
+                      <p className="text-emerald-free/70 text-xs mt-0.5">{addSlotMsg}</p>
+                    </div>
+                  </div>
+                )}
+                {addSlotStatus === 'error' && (
+                  <div className="p-4 rounded-xl bg-red-busy/10 border border-red-busy/30 flex items-start gap-3">
+                    <AlertCircle className="text-red-busy shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-red-busy font-semibold text-sm">Failed to Add Slot</p>
+                      <p className="text-red-busy/70 text-xs mt-0.5">{addSlotMsg}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={addSlotStatus === 'loading'}
+                  className="w-full py-3.5 rounded-full bg-emerald-free hover:bg-emerald-free/90 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {addSlotStatus === 'loading'
+                    ? <><Lottie animationData={loaderAnimation} className="w-6 h-6" /> Adding Slot...</>
+                    : <><PlusCircle size={18} /> Add This Slot to Database</>
+                  }
+                </button>
+              </form>
+            )}
+
+            {/* Recently Added Slots */}
+            {recentSlots.length > 0 && (
+              <div className="glass-card p-5">
+                <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-3">Recently Added This Session</h4>
+                <div className="space-y-2">
+                  {recentSlots.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between bg-slate-deeper px-4 py-2.5 rounded-xl border border-slate-border">
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="text-emerald-free font-bold">{s.room}</span>
+                        <span className="text-text-muted">•</span>
+                        <span className="text-text-primary">{s.subject}</span>
+                        <span className="text-text-muted">•</span>
+                        <span className="text-text-muted">{s.day} {s.start_time}–{s.end_time}</span>
+                      </div>
+                      <span className="text-xs bg-emerald-free/20 text-emerald-free px-2 py-0.5 rounded-full font-semibold">Live</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════ MANAGE SLOTS TAB ══════════ */}
+        {activeTab === 'manage-slots' && (
+          <div className="space-y-6">
+            {/* Filter Section */}
+            <form onSubmit={handleManageSearch} className="glass-card p-6 relative z-50">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-red-busy/10 flex items-center justify-center">
+                  <Search className="text-red-busy" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-text-primary text-lg">Search & Delete Slots</h3>
+                  <p className="text-text-muted text-sm">Find specific slots to remove from the database.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 relative z-50">
+                {/* Search Building */}
+                <div className="relative z-50">
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Building</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="e.g. B, NB"
+                      value={manageBuildingSearch || manageSearch.building}
+                      onChange={e => { setManageBuildingSearch(e.target.value); setManageSearch(p => ({ ...p, building: e.target.value })); setShowManageBuildingDrop(true) }}
+                      onFocus={() => setShowManageBuildingDrop(true)}
+                      onBlur={() => setTimeout(() => setShowManageBuildingDrop(false), 200)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-red-busy focus:ring-1 focus:ring-red-busy transition-colors pr-10"
+                    />
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                  </div>
+                  {showManageBuildingDrop && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+                      {(metadata.buildings.length > 0 ? metadata.buildings : ['A','B','C','D','E','F','G','NB','BX','I'])
+                        .filter(b => b.toLowerCase().includes((manageBuildingSearch || manageSearch.building).toLowerCase()))
+                        .map((b, i) => (
+                          <div
+                            key={i}
+                            className="px-4 py-2.5 hover:bg-slate-deeper cursor-pointer text-text-primary text-sm border-b border-slate-border/40 last:border-0"
+                            onMouseDown={() => { setManageSearch(p => ({ ...p, building: b })); setManageBuildingSearch(''); setShowManageBuildingDrop(false) }}
+                          >
+                            Block {b}
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+
+                {/* Search Room */}
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Room</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. B012"
+                    value={manageSearch.room}
+                    onChange={e => setManageSearch(p => ({ ...p, room: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-red-busy transition-colors"
+                  />
+                </div>
+
+                {/* Search Day */}
+                <div className="relative z-40">
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Day</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      readOnly
+                      placeholder="Any Day"
+                      value={manageSearch.day}
+                      onFocus={() => setShowManageDayDrop(true)}
+                      onBlur={() => setTimeout(() => setShowManageDayDrop(false), 200)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary cursor-pointer focus:outline-none focus:border-red-busy transition-colors pr-10"
+                    />
+                    {manageSearch.day && (
+                      <X size={14} className="absolute right-8 top-1/2 -translate-y-1/2 text-text-muted cursor-pointer hover:text-white" onMouseDown={() => setManageSearch(p => ({ ...p, day: '' }))} />
+                    )}
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                  </div>
+                  {showManageDayDrop && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 overflow-hidden">
+                      <div className="px-4 py-2.5 cursor-pointer text-sm border-b border-slate-border/40 hover:bg-slate-deeper text-text-primary" onMouseDown={() => { setManageSearch(p => ({ ...p, day: '' })); setShowManageDayDrop(false) }}>Any Day</div>
+                      {DAYS.map((d, i) => (
+                        <div
+                          key={i}
+                          className="px-4 py-2.5 cursor-pointer text-sm border-b border-slate-border/40 hover:bg-slate-deeper text-text-primary"
+                          onMouseDown={() => { setManageSearch(p => ({ ...p, day: d })); setShowManageDayDrop(false) }}
+                        >
+                          {d}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={manageLoading}
+                className="w-full py-3 rounded-full bg-red-busy hover:bg-red-busy/90 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              >
+                {manageLoading ? <><Lottie animationData={loaderAnimation} className="w-5 h-5" /> Searching...</> : <><Search size={16} /> Search Slots</>}
+              </button>
+            </form>
+
+            {/* Results Section */}
+            {manageResults.length > 0 && (
+              <div className="glass-card p-6">
+                <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span className="bg-red-busy/20 text-red-busy px-2 py-0.5 rounded-md">{manageResults.length}</span> Slots Found
+                </h4>
+                
+                <div className="space-y-3">
+                  {manageResults.map(slot => (
+                    <div key={slot.id} className={`p-4 rounded-xl border transition-colors ${deleteConfirmId === slot.id ? 'bg-red-busy/5 border-red-busy/50' : 'bg-slate-deeper border-slate-border hover:border-slate-border/80'}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span className="text-text-primary font-bold">{slot.room}</span>
+                            <span className="text-text-muted text-xs">•</span>
+                            <span className="text-text-secondary text-sm font-semibold">{slot.day}</span>
+                            <span className="text-text-muted text-xs">•</span>
+                            <span className="text-text-secondary text-sm">{slot.start_time} - {slot.end_time}</span>
+                            {slot.session_type && (
+                              <span className="bg-slate-border text-text-primary text-[10px] px-2 py-0.5 rounded-full ml-1">{slot.session_type}</span>
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-x-3 gap-y-1 text-sm">
+                            <span className="text-emerald-free/90 font-medium truncate max-w-[200px]">{slot.subject}</span>
+                            <span className="hidden sm:inline text-text-muted">•</span>
+                            <span className="text-text-muted truncate max-w-[150px]">{slot.teacher}</span>
+                            {(slot.class_code || slot.section) && (
+                              <>
+                                <span className="hidden sm:inline text-text-muted">•</span>
+                                <span className="text-text-muted/70 text-xs">{slot.class_code} {slot.section && `(${slot.section})`}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="shrink-0 flex items-center justify-end">
+                          {deleteConfirmId === slot.id ? (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="px-3 py-1.5 rounded-md bg-slate-border hover:bg-slate-border/80 text-text-primary text-xs font-semibold transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSlot(slot.id)}
+                                disabled={deleteLoading}
+                                className="px-3 py-1.5 rounded-md bg-red-busy hover:bg-red-busy/90 text-white text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                              >
+                                {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeleteConfirmId(slot.id)}
+                              className="p-2 rounded-lg bg-red-busy/10 text-red-busy hover:bg-red-busy/20 transition-colors"
+                              title="Delete this slot"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
+                        
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {manageResults.length === 0 && (manageSearch.room || manageSearch.building || manageSearch.day) && !manageLoading && (
+              <div className="glass-card p-12 text-center">
+                <Search className="w-12 h-12 text-slate-border mx-auto mb-4" />
+                <p className="text-text-secondary">No slots found matching your criteria.</p>
               </div>
             )}
           </div>
@@ -434,13 +1095,13 @@ export default function AdminPage() {
                       {buildingIssues.map(issue => (
                         <div key={issue.id} className="glass-card p-4 flex flex-col sm:flex-row justify-between gap-4 border-l-4 border-l-violet-primary/50">
                           <div>
-                            <div className="text-[10px] uppercase font-bold text-text-muted mb-1 flex items-center gap-2 flex-wrap">
-                              <span>{new Date(issue.reported_at).toLocaleString()}</span>
-                              {issue.room && <span className="bg-slate-border px-1.5 py-0.5 rounded text-text-primary">Room: {issue.room}</span>}
-                              {issue.slot_time && <span className="bg-slate-border px-1.5 py-0.5 rounded text-text-primary">{issue.slot_time}</span>}
-                              {issue.issue_type && <span className="bg-amber-soon/20 text-amber-soon px-1.5 py-0.5 rounded">{issue.issue_type}</span>}
+                            <div className="text-[10px] uppercase font-bold mb-2 flex items-center gap-2 flex-wrap">
+                              <span className="text-text-muted">{new Date(issue.reported_at).toLocaleString()}</span>
+                              {issue.issue_type && <span className="bg-red-busy/20 text-red-busy px-2 py-0.5 rounded flex items-center gap-1 border border-red-busy/30"><AlertTriangle size={12} /> {issue.issue_type}</span>}
+                              {issue.room && <span className="bg-violet-primary/20 text-violet-primary px-2 py-0.5 rounded border border-violet-primary/30">Room {issue.room}</span>}
+                              {issue.slot_time && <span className="bg-emerald-free/20 text-emerald-free px-2 py-0.5 rounded border border-emerald-free/30">{issue.slot_time}</span>}
                             </div>
-                            <div className="text-text-primary text-sm mt-2">{issue.query_text}</div>
+                            <div className="text-text-primary text-sm bg-slate-deeper p-3 rounded-lg border border-slate-border/50">{issue.query_text}</div>
                             <div className="mt-2 inline-block px-2 py-1 bg-slate-border text-text-secondary text-[10px] rounded-md font-bold uppercase tracking-wider">
                               {issue.status}
                             </div>

@@ -436,7 +436,7 @@ export default function Hero3D() {
             </Link>
 
             <a
-              href="#how-it-works"
+              href="#secondary-demo-video"
               style={{
                 display: "inline-flex",
                 alignItems: "center",

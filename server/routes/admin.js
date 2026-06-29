@@ -331,4 +331,176 @@ router.delete('/issues/clear-resolved', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/admin/slot-metadata
+ * Returns distinct subjects, teachers, buildings, and session types from timetable_slots.
+ * Used to populate searchable dropdowns in the Add Slot form.
+ */
+router.get('/slot-metadata', authMiddleware, async (req, res) => {
+  try {
+    const db = getSupabase();
+    const pageSize = 1000;
+
+    const subjects = new Set();
+    const teachers = new Set();
+    const buildings = new Set();
+    const sessionTypes = new Set();
+    const classCodes = new Set();
+
+    let from = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await db
+        .from('timetable_slots')
+        .select('subject, teacher, building, session_type, class_code')
+        .range(from, from + pageSize - 1);
+
+      if (error) return res.status(500).json({ error: error.message });
+      if (!data || data.length === 0) { hasMore = false; break; }
+
+      for (const row of data) {
+        if (row.subject) subjects.add(row.subject.trim());
+        if (row.teacher) teachers.add(row.teacher.trim());
+        if (row.building) buildings.add(row.building.trim());
+        if (row.session_type) sessionTypes.add(row.session_type.trim());
+        if (row.class_code) classCodes.add(row.class_code.trim());
+      }
+
+      from += pageSize;
+      if (data.length < pageSize) hasMore = false;
+    }
+
+    res.json({
+      subjects: [...subjects].sort(),
+      teachers: [...teachers].sort(),
+      buildings: [...buildings].sort(),
+      sessionTypes: [...sessionTypes].sort(),
+      classCodes: [...classCodes].sort(),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch slot metadata' });
+  }
+});
+
+/**
+ * POST /api/admin/add-slot
+ * Manually inserts a single slot into timetable_slots.
+ * Checks for duplicates (same room + day + overlapping time).
+ */
+router.post('/add-slot', authMiddleware, async (req, res) => {
+  try {
+    const {
+      building, room, subject, teacher, day,
+      start_time, end_time, session_type,
+      class_code, section, program, year
+    } = req.body;
+
+    // Validate required fields
+    const required = { building, room, subject, teacher, day, start_time, end_time };
+    for (const [key, val] of Object.entries(required)) {
+      if (!val || !String(val).trim()) {
+        return res.status(400).json({ error: `Field "${key}" is required.` });
+      }
+    }
+
+    const db = getSupabase();
+
+    // Duplicate check: same room + day + start_time
+    const { data: existing, error: checkError } = await db
+      .from('timetable_slots')
+      .select('id')
+      .eq('room', room.trim())
+      .eq('day', day.trim().toUpperCase())
+      .eq('start_time', start_time.trim());
+
+    if (checkError) return res.status(500).json({ error: checkError.message });
+
+    if (existing && existing.length > 0) {
+      return res.status(409).json({
+        error: `Slot already exists for Room ${room} on ${day} at ${start_time}. Duplicate not allowed.`
+      });
+    }
+
+    const newSlot = {
+      building: building.trim().toUpperCase(),
+      room: room.trim().toUpperCase(),
+      subject: subject.trim(),
+      teacher: teacher.trim(),
+      day: day.trim().toUpperCase(),
+      start_time: start_time.trim(),
+      end_time: end_time.trim(),
+      session_type: (session_type || 'LEC').trim().toUpperCase(),
+      class_code: (class_code || '').trim().toUpperCase(),
+      section: (section || '').trim().toUpperCase(),
+      program: (program || '').trim().toUpperCase(),
+      year: year ? String(year).trim() : '',
+    };
+
+    const { data, error: insertError } = await db
+      .from('timetable_slots')
+      .insert(newSlot)
+      .select();
+
+    if (insertError) return res.status(500).json({ error: insertError.message });
+
+    res.status(201).json({ success: true, slot: data[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add slot' });
+  }
+});
+
+/**
+ * GET /api/admin/search-slots
+ * Searches slots based on optional filters: building, room, day.
+ */
+router.get('/search-slots', authMiddleware, async (req, res) => {
+  try {
+    const { building, room, day } = req.query;
+    const db = getSupabase();
+
+    let query = db.from('timetable_slots').select('*');
+
+    if (building) query = query.eq('building', building.trim().toUpperCase());
+    if (room) query = query.eq('room', room.trim().toUpperCase());
+    if (day) query = query.eq('day', day.trim().toUpperCase());
+
+    const { data, error } = await query.order('day').order('start_time').limit(200);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ slots: data || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to search slots' });
+  }
+});
+
+/**
+ * DELETE /api/admin/slots/:id
+ * Deletes a specific timetable slot by its ID.
+ */
+router.delete('/slots/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Slot ID is required' });
+
+    const db = getSupabase();
+    const { error } = await db
+      .from('timetable_slots')
+      .delete()
+      .eq('id', id);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete slot' });
+  }
+});
+
 module.exports = router;
+

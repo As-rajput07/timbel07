@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, User } from 'lucide-react';
+import { MessageSquare, X, Send, User, AlertTriangle, ChevronDown, CheckCircle } from 'lucide-react';
 import LottieLib from 'lottie-react';
 import assistantAnimation from '../assets/assistent.json';
 import loaderAnimation from '../assets/loder.json';
@@ -14,6 +14,18 @@ export default function AIAssistantWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Structured Issue Form State
+  const [showIssueForm, setShowIssueForm] = useState(false);
+  const [issueForm, setIssueForm] = useState({
+    issue_type: 'Missing Slot',
+    room: '',
+    day: 'MON',
+    slot_time: '',
+    query_text: ''
+  });
+  const [issueSubmitting, setIssueSubmitting] = useState(false);
+  const [issueSuccess, setIssueSuccess] = useState(false);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -52,6 +64,45 @@ export default function AIAssistantWidget() {
       setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, abhi backend me thodi problem hai. Please thodi der baad try karein.' }]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleIssueSubmit = async (e) => {
+    e.preventDefault();
+    setIssueSubmitting(true);
+    try {
+      const response = await fetch('/api/chat/report-slot-issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          room: issueForm.room,
+          slot_time: `${issueForm.day} at ${issueForm.slot_time}`,
+          issue_type: issueForm.issue_type,
+          query_text: issueForm.query_text
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to submit issue');
+      
+      setIssueSuccess(true);
+      setMessages(prev => [...prev, { 
+        role: 'user', 
+        text: `Reported Issue: [${issueForm.issue_type}] for Room ${issueForm.room} on ${issueForm.day} at ${issueForm.slot_time}. Details: ${issueForm.query_text}` 
+      }, {
+        role: 'ai',
+        text: 'Thank you! Your issue has been structured and sent to the Admin for approval.'
+      }]);
+
+      setTimeout(() => {
+        setShowIssueForm(false);
+        setIssueSuccess(false);
+        setIssueForm({ issue_type: 'Missing Slot', room: '', day: 'MON', slot_time: '', query_text: '' });
+      }, 2000);
+    } catch (error) {
+      console.error('Submit Issue Error:', error);
+      alert('Failed to submit issue. Please try again.');
+    } finally {
+      setIssueSubmitting(false);
     }
   };
 
@@ -132,6 +183,120 @@ export default function AIAssistantWidget() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Quick Action Bar */}
+          {!showIssueForm && (
+            <div className="px-4 pb-2 pt-1 flex gap-2 overflow-x-auto scrollbar-none">
+              <button
+                onClick={() => setShowIssueForm(true)}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-soon/10 text-amber-soon border border-amber-soon/30 text-xs font-semibold hover:bg-amber-soon/20 transition-colors"
+              >
+                <AlertTriangle size={14} /> Report Issue
+              </button>
+            </div>
+          )}
+
+          {/* Structured Issue Form */}
+          {showIssueForm && (
+            <div className="absolute inset-x-0 bottom-0 top-[65px] bg-slate-darker z-20 flex flex-col animate-in slide-in-from-bottom-2 duration-200">
+              <div className="p-4 border-b border-slate-border/50 flex justify-between items-center bg-slate-card">
+                <h4 className="font-bold text-text-primary text-sm flex items-center gap-2">
+                  <AlertTriangle className="text-amber-soon w-4 h-4" /> Structured Issue Report
+                </h4>
+                <button onClick={() => setShowIssueForm(false)} className="text-text-muted hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {issueSuccess ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                  <div className="w-16 h-16 rounded-full bg-emerald-free/20 flex items-center justify-center mb-4">
+                    <CheckCircle className="w-8 h-8 text-emerald-free" />
+                  </div>
+                  <h4 className="text-lg font-bold text-text-primary mb-2">Issue Reported</h4>
+                  <p className="text-sm text-text-muted">Admin has been notified with your structured data.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleIssueSubmit} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-border">
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Issue Type *</label>
+                    <div className="relative">
+                      <select 
+                        value={issueForm.issue_type}
+                        onChange={e => setIssueForm(p => ({ ...p, issue_type: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-deep border border-slate-border text-text-primary text-sm appearance-none focus:outline-none focus:border-amber-soon"
+                        required
+                      >
+                        <option value="Missing Slot">Missing Slot</option>
+                        <option value="Wrong Teacher">Wrong Teacher</option>
+                        <option value="Room Conflict">Room Conflict</option>
+                        <option value="Class Cancelled">Class Cancelled</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Room *</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. B012"
+                        value={issueForm.room}
+                        onChange={e => setIssueForm(p => ({ ...p, room: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-deep border border-slate-border text-text-primary text-sm focus:outline-none focus:border-amber-soon"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Day *</label>
+                      <div className="relative">
+                        <select 
+                          value={issueForm.day}
+                          onChange={e => setIssueForm(p => ({ ...p, day: e.target.value }))}
+                          className="w-full px-3 py-2.5 rounded-xl bg-slate-deep border border-slate-border text-text-primary text-sm appearance-none focus:outline-none focus:border-amber-soon"
+                          required
+                        >
+                          {['MON','TUE','WED','THU','FRI','SAT'].map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Time (Optional)</label>
+                    <input 
+                      type="time" 
+                      value={issueForm.slot_time}
+                      onChange={e => setIssueForm(p => ({ ...p, slot_time: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-deep border border-slate-border text-text-primary text-sm focus:outline-none focus:border-amber-soon"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Description *</label>
+                    <textarea 
+                      placeholder="Please explain the exact issue..."
+                      value={issueForm.query_text}
+                      onChange={e => setIssueForm(p => ({ ...p, query_text: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-deep border border-slate-border text-text-primary text-sm h-20 resize-none focus:outline-none focus:border-amber-soon"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={issueSubmitting}
+                    className="w-full py-3 rounded-xl bg-amber-soon hover:bg-amber-soon/90 text-slate-darker font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                  >
+                    {issueSubmitting ? <Lottie animationData={loaderAnimation} className="w-5 h-5" /> : 'Submit Report'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
 
           {/* Input Area */}
           <div className="p-4 border-t border-slate-border/50 bg-slate-darker shrink-0">
