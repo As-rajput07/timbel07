@@ -502,5 +502,35 @@ router.delete('/slots/:id', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * PUT /api/admin/slots/:id
+ * Updates an existing timetable slot by its ID.
+ */
+router.put('/slots/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Slot ID is required' });
+
+    const updateData = req.body;
+    if (!updateData || Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'Update data is required' });
+    }
+
+    const db = getSupabase();
+    const { data, error } = await db
+      .from('timetable_slots')
+      .update(updateData)
+      .eq('id', id)
+      .select();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ success: true, slot: data[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update slot' });
+  }
+});
+
 module.exports = router;
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Shield, Upload, CheckCircle, AlertCircle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search } from 'lucide-react'
+import { Shield, Upload, CheckCircle, AlertCircle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search, Edit3, XCircle } from 'lucide-react'
 import LottieLib from 'lottie-react'
 import ReactMarkdown from 'react-markdown'
 import assistantAnimation from '../assets/assistent.json'
@@ -63,6 +63,9 @@ export default function AdminPage() {
   const [manageLoading, setManageLoading] = useState(false)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [editingSlotId, setEditingSlotId] = useState(null)
+  const [editSlotData, setEditSlotData] = useState({})
+  const [editLoading, setEditLoading] = useState(false)
 
   useEffect(() => {
     if (token && activeTab === 'queries') fetchIssues()
@@ -108,12 +111,37 @@ export default function AdminPage() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      const data = await res.json()
       if (res.ok) {
         setManageResults(prev => prev.filter(s => s.id !== id))
         setDeleteConfirmId(null)
+      } else {
+        alert(data.error || 'Failed to delete slot')
       }
     } catch (err) { console.error(err) }
     finally { setDeleteLoading(false) }
+  }
+
+  const handleEditSlot = async (id) => {
+    setEditLoading(true)
+    try {
+      const res = await fetch(`/api/admin/slots/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editSlotData)
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setManageResults(prev => prev.map(s => s.id === id ? data.slot : s))
+        setEditingSlotId(null)
+      } else {
+        alert(data.error || 'Failed to update slot')
+      }
+    } catch (err) { console.error(err) }
+    finally { setEditLoading(false) }
   }
 
   const handleSlotFormChange = (field, value) => {
@@ -939,64 +967,134 @@ export default function AdminPage() {
                 
                 <div className="space-y-3">
                   {manageResults.map(slot => (
-                    <div key={slot.id} className={`p-4 rounded-xl border transition-colors ${deleteConfirmId === slot.id ? 'bg-red-busy/5 border-red-busy/50' : 'bg-slate-deeper border-slate-border hover:border-slate-border/80'}`}>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span className="text-text-primary font-bold">{slot.room}</span>
-                            <span className="text-text-muted text-xs">•</span>
-                            <span className="text-text-secondary text-sm font-semibold">{slot.day}</span>
-                            <span className="text-text-muted text-xs">•</span>
-                            <span className="text-text-secondary text-sm">{slot.start_time} - {slot.end_time}</span>
-                            {slot.session_type && (
-                              <span className="bg-slate-border text-text-primary text-[10px] px-2 py-0.5 rounded-full ml-1">{slot.session_type}</span>
-                            )}
+                    <div key={slot.id} className={`p-4 rounded-xl border transition-colors ${deleteConfirmId === slot.id ? 'bg-red-busy/5 border-red-busy/50' : editingSlotId === slot.id ? 'bg-slate-deeper/80 border-violet-primary/50' : 'bg-slate-deeper border-slate-border hover:border-slate-border/80'}`}>
+                      {editingSlotId === slot.id ? (
+                        /* Inline Edit Form */
+                        <div className="space-y-3 animate-fade-in">
+                          <div className="flex justify-between items-center mb-2 border-b border-slate-border/50 pb-2">
+                            <h5 className="text-sm font-bold text-violet-primary">Editing Slot</h5>
+                            <button onClick={() => setEditingSlotId(null)} className="text-text-muted hover:text-white transition-colors"><XCircle size={18} /></button>
                           </div>
-                          
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-x-3 gap-y-1 text-sm">
-                            <span className="text-emerald-free/90 font-medium truncate max-w-[200px]">{slot.subject}</span>
-                            <span className="hidden sm:inline text-text-muted">•</span>
-                            <span className="text-text-muted truncate max-w-[150px]">{slot.teacher}</span>
-                            {(slot.class_code || slot.section) && (
-                              <>
-                                <span className="hidden sm:inline text-text-muted">•</span>
-                                <span className="text-text-muted/70 text-xs">{slot.class_code} {slot.section && `(${slot.section})`}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="shrink-0 flex items-center justify-end">
-                          {deleteConfirmId === slot.id ? (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => setDeleteConfirmId(null)}
-                                className="px-3 py-1.5 rounded-md bg-slate-border hover:bg-slate-border/80 text-text-primary text-xs font-semibold transition-colors"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => handleDeleteSlot(slot.id)}
-                                disabled={deleteLoading}
-                                className="px-3 py-1.5 rounded-md bg-red-busy hover:bg-red-busy/90 text-white text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
-                              >
-                                {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
-                              </button>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Room</label>
+                              <input type="text" value={editSlotData.room || ''} onChange={e => setEditSlotData(p => ({ ...p, room: e.target.value.toUpperCase() }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
                             </div>
-                          ) : (
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Day</label>
+                              <select value={editSlotData.day || ''} onChange={e => setEditSlotData(p => ({ ...p, day: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none">
+                                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Start (HH:MM)</label>
+                              <input type="time" value={editSlotData.start_time || ''} onChange={e => setEditSlotData(p => ({ ...p, start_time: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">End (HH:MM)</label>
+                              <input type="time" value={editSlotData.end_time || ''} onChange={e => setEditSlotData(p => ({ ...p, end_time: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                            </div>
+                            <div className="col-span-2 sm:col-span-2">
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Subject</label>
+                              <input type="text" value={editSlotData.subject || ''} onChange={e => setEditSlotData(p => ({ ...p, subject: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                            </div>
+                            <div className="col-span-2 sm:col-span-2">
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Teacher</label>
+                              <input type="text" value={editSlotData.teacher || ''} onChange={e => setEditSlotData(p => ({ ...p, teacher: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Class Code</label>
+                              <input type="text" value={editSlotData.class_code || ''} onChange={e => setEditSlotData(p => ({ ...p, class_code: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Section</label>
+                              <input type="text" value={editSlotData.section || ''} onChange={e => setEditSlotData(p => ({ ...p, section: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-text-muted uppercase mb-1">Type</label>
+                              <select value={editSlotData.session_type || ''} onChange={e => setEditSlotData(p => ({ ...p, session_type: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none">
+                                {SESSION_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex justify-end pt-2">
                             <button
-                              onClick={() => setDeleteConfirmId(slot.id)}
-                              className="p-2 rounded-lg bg-red-busy/10 text-red-busy hover:bg-red-busy/20 transition-colors"
-                              title="Delete this slot"
+                              onClick={() => handleEditSlot(slot.id)}
+                              disabled={editLoading}
+                              className="px-4 py-2 bg-violet-primary hover:bg-violet-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
                             >
-                              <Trash2 size={18} />
+                              {editLoading ? 'Saving...' : 'Save Changes'}
                             </button>
-                          )}
+                          </div>
                         </div>
-                        
-                      </div>
+                      ) : (
+                        /* Read Only View */
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className="text-text-primary font-bold">{slot.room}</span>
+                              <span className="text-text-muted text-xs">•</span>
+                              <span className="text-text-secondary text-sm font-semibold">{slot.day}</span>
+                              <span className="text-text-muted text-xs">•</span>
+                              <span className="text-text-secondary text-sm">{slot.start_time} - {slot.end_time}</span>
+                              {slot.session_type && (
+                                <span className="bg-slate-border text-text-primary text-[10px] px-2 py-0.5 rounded-full ml-1">{slot.session_type}</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-x-3 gap-y-1 text-sm">
+                              <span className="text-emerald-free/90 font-medium truncate max-w-[200px]">{slot.subject}</span>
+                              <span className="hidden sm:inline text-text-muted">•</span>
+                              <span className="text-text-muted truncate max-w-[150px]">{slot.teacher}</span>
+                              {(slot.class_code || slot.section) && (
+                                <>
+                                  <span className="hidden sm:inline text-text-muted">•</span>
+                                  <span className="text-text-muted/70 text-xs">{slot.class_code} {slot.section && `(${slot.section})`}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="shrink-0 flex items-center justify-end">
+                            {deleteConfirmId === slot.id ? (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setDeleteConfirmId(null)}
+                                  className="px-3 py-1.5 rounded-md bg-slate-border hover:bg-slate-border/80 text-text-primary text-xs font-semibold transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteSlot(slot.id)}
+                                  disabled={deleteLoading}
+                                  className="px-3 py-1.5 rounded-md bg-red-busy hover:bg-red-busy/90 text-white text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                                >
+                                  {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => { setEditingSlotId(slot.id); setEditSlotData({ ...slot }); }}
+                                  className="p-2 rounded-lg bg-violet-primary/10 text-violet-primary hover:bg-violet-primary/20 transition-colors"
+                                  title="Edit this slot"
+                                >
+                                  <Edit3 size={18} />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirmId(slot.id)}
+                                  className="p-2 rounded-lg bg-red-busy/10 text-red-busy hover:bg-red-busy/20 transition-colors"
+                                  title="Delete this slot"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
