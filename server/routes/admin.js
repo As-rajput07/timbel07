@@ -407,19 +407,21 @@ router.post('/add-slot', authMiddleware, async (req, res) => {
 
     const db = getSupabase();
 
-    // Duplicate check: same room + day + start_time
+    // Duplicate check: same room + day + start_time + section
+    // This allows different sections to share the same room/time (e.g. Lab A and Lab B in C210)
     const { data: existing, error: checkError } = await db
       .from('timetable_slots')
       .select('id')
-      .eq('room', room.trim())
+      .eq('room', room.trim().toUpperCase())
       .eq('day', day.trim().toUpperCase())
-      .eq('start_time', start_time.trim());
+      .eq('start_time', start_time.trim())
+      .eq('section', (section || '').trim().toUpperCase());
 
     if (checkError) return res.status(500).json({ error: checkError.message });
 
     if (existing && existing.length > 0) {
       return res.status(409).json({
-        error: `Slot already exists for Room ${room} on ${day} at ${start_time}. Duplicate not allowed.`
+        error: `Slot already exists for Room ${room} on ${day} at ${start_time} for Section ${section || 'All'}. Duplicate not allowed.`
       });
     }
 
