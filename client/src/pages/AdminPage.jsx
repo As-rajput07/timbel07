@@ -30,7 +30,7 @@ export default function AdminPage() {
 
   // Add Slot State
   const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-  const SESSION_TYPES = ['LEC', 'LAB', 'TUT', 'EXAM']
+  const SESSION_TYPES = ['Lecture', 'Lab', 'Tutorial', 'Exam']
   const emptySlotForm = {
     building: '', room: '', subject: '', teacher: '',
     day: 'MON', start_time: '', end_time: '',
@@ -66,6 +66,12 @@ export default function AdminPage() {
   const [editingSlotId, setEditingSlotId] = useState(null)
   const [editSlotData, setEditSlotData] = useState({})
   const [editLoading, setEditLoading] = useState(false)
+  const [editSubjectSearch, setEditSubjectSearch] = useState('')
+  const [editTeacherSearch, setEditTeacherSearch] = useState('')
+  const [editClassCodeSearch, setEditClassCodeSearch] = useState('')
+  const [showEditSubjectDrop, setShowEditSubjectDrop] = useState(false)
+  const [showEditTeacherDrop, setShowEditTeacherDrop] = useState(false)
+  const [showEditClassCodeDrop, setShowEditClassCodeDrop] = useState(false)
 
   useEffect(() => {
     if (token && activeTab === 'queries') fetchIssues()
@@ -994,17 +1000,83 @@ export default function AdminPage() {
                               <label className="block text-[10px] text-text-muted uppercase mb-1">End (HH:MM)</label>
                               <input type="time" value={editSlotData.end_time || ''} onChange={e => setEditSlotData(p => ({ ...p, end_time: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
                             </div>
-                            <div className="col-span-2 sm:col-span-2">
+                            <div className="col-span-2 sm:col-span-2 relative">
                               <label className="block text-[10px] text-text-muted uppercase mb-1">Subject</label>
-                              <input type="text" value={editSlotData.subject || ''} onChange={e => setEditSlotData(p => ({ ...p, subject: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                              <div className="relative">
+                                <input 
+                                  type="text" 
+                                  value={editSubjectSearch || editSlotData.subject || ''} 
+                                  onChange={e => { setEditSubjectSearch(e.target.value); setEditSlotData(p => ({ ...p, subject: e.target.value })); setShowEditSubjectDrop(true) }} 
+                                  onFocus={() => setShowEditSubjectDrop(true)}
+                                  onBlur={() => setTimeout(() => setShowEditSubjectDrop(false), 200)}
+                                  className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none pr-7" 
+                                />
+                                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                              </div>
+                              {showEditSubjectDrop && metadata.subjects.filter(s => s.toLowerCase().includes((editSubjectSearch || editSlotData.subject || '').toLowerCase())).length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-40 overflow-y-auto">
+                                  {metadata.subjects
+                                    .filter(s => s.toLowerCase().includes((editSubjectSearch || editSlotData.subject || '').toLowerCase()))
+                                    .map((s, i) => (
+                                      <div key={i} className="px-3 py-2 hover:bg-slate-deeper cursor-pointer text-text-primary text-xs border-b border-slate-border/40 last:border-0"
+                                        onMouseDown={() => { setEditSlotData(p => ({ ...p, subject: s })); setEditSubjectSearch(''); setShowEditSubjectDrop(false) }}>
+                                        {s}
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
                             </div>
-                            <div className="col-span-2 sm:col-span-2">
+                            <div className="col-span-2 sm:col-span-2 relative">
                               <label className="block text-[10px] text-text-muted uppercase mb-1">Teacher</label>
-                              <input type="text" value={editSlotData.teacher || ''} onChange={e => setEditSlotData(p => ({ ...p, teacher: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                              <div className="relative">
+                                <input 
+                                  type="text" 
+                                  value={editTeacherSearch || editSlotData.teacher || ''} 
+                                  onChange={e => { setEditTeacherSearch(e.target.value); setEditSlotData(p => ({ ...p, teacher: e.target.value })); setShowEditTeacherDrop(true) }} 
+                                  onFocus={() => setShowEditTeacherDrop(true)}
+                                  onBlur={() => setTimeout(() => setShowEditTeacherDrop(false), 200)}
+                                  className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none pr-7" 
+                                />
+                                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                              </div>
+                              {showEditTeacherDrop && metadata.teachers.filter(t => t.toLowerCase().includes((editTeacherSearch || editSlotData.teacher || '').toLowerCase())).length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-40 overflow-y-auto">
+                                  {metadata.teachers
+                                    .filter(t => t.toLowerCase().includes((editTeacherSearch || editSlotData.teacher || '').toLowerCase()))
+                                    .map((t, i) => (
+                                      <div key={i} className="px-3 py-2 hover:bg-slate-deeper cursor-pointer text-text-primary text-xs border-b border-slate-border/40 last:border-0"
+                                        onMouseDown={() => { setEditSlotData(p => ({ ...p, teacher: t })); setEditTeacherSearch(''); setShowEditTeacherDrop(false) }}>
+                                        {t}
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
                             </div>
-                            <div>
+                            <div className="relative">
                               <label className="block text-[10px] text-text-muted uppercase mb-1">Class Code</label>
-                              <input type="text" value={editSlotData.class_code || ''} onChange={e => setEditSlotData(p => ({ ...p, class_code: e.target.value }))} className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none" />
+                              <div className="relative">
+                                <input 
+                                  type="text" 
+                                  value={editClassCodeSearch || editSlotData.class_code || ''} 
+                                  onChange={e => { setEditClassCodeSearch(e.target.value); setEditSlotData(p => ({ ...p, class_code: e.target.value })); setShowEditClassCodeDrop(true) }} 
+                                  onFocus={() => setShowEditClassCodeDrop(true)}
+                                  onBlur={() => setTimeout(() => setShowEditClassCodeDrop(false), 200)}
+                                  className="w-full bg-slate-card border border-slate-border rounded-lg px-3 py-1.5 text-text-primary focus:border-violet-primary focus:outline-none pr-7" 
+                                />
+                                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                              </div>
+                              {showEditClassCodeDrop && metadata.classCodes.filter(c => c.toLowerCase().includes((editClassCodeSearch || editSlotData.class_code || '').toLowerCase())).length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-40 overflow-y-auto">
+                                  {metadata.classCodes
+                                    .filter(c => c.toLowerCase().includes((editClassCodeSearch || editSlotData.class_code || '').toLowerCase()))
+                                    .map((c, i) => (
+                                      <div key={i} className="px-3 py-2 hover:bg-slate-deeper cursor-pointer text-text-primary text-xs border-b border-slate-border/40 last:border-0"
+                                        onMouseDown={() => { setEditSlotData(p => ({ ...p, class_code: c })); setEditClassCodeSearch(''); setShowEditClassCodeDrop(false) }}>
+                                        {c}
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
                             </div>
                             <div>
                               <label className="block text-[10px] text-text-muted uppercase mb-1">Section</label>
