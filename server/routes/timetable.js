@@ -363,8 +363,8 @@ router.get('/classes/:classCode', async (req, res) => {
           // If no section requested, include all (or just empty if we want to be strict, but usually no section means it's a unified class)
           allSlots.push(row);
         } else {
-          // If section requested, include matching section AND empty sections
-          if (rowSec === section || rowSec === '') {
+          // If section requested, include matching section AND empty sections AND any Lecture slots
+          if (rowSec === section || rowSec === '' || row.session_type === 'LEC') {
             allSlots.push(row);
           }
         }
