@@ -21,6 +21,14 @@ Today was focused on refining the user experience, customizing the AI integratio
 - **Approve & Apply Feature**: Wired the previously dummy "Approve & Apply Changes" button to a functional backend route. The heuristic now automatically evaluates the AI's results. If an issue is flagged as "Class Canceled" or "Slot Empty," the backend intelligently deletes that slot from the live database to free the room for other students, and marks the query as "resolved."
 - **Clear Resolved Data**: Built a "Clear Past Analyzed Data" button that securely flushes out fully resolved queries from the database, keeping the admin dashboard clutter-free.
 
+### 5. Universal Manual Slot Management (Admin Panel)
+- **Add Slot System**: Built a comprehensive manual slot entry system inside the Admin Page. Features searchable dropdowns for Building, Subject, Teacher, and Class Code dynamically fetched from the database, preventing manual entry errors. Also includes a strict duplicate-slot prevention system.
+- **Delete Slot System**: Implemented a "Manage Slots" tab for admins to search existing slots by Building, Room, and Day. Admins can directly delete erroneous slots with a two-step confirm-delete safeguard.
+
+### 6. Intelligent AI Assistant Querying & Structured Reporting
+- **Structured Issue Reporting**: Upgraded the generic AI chat reporting. When users report an issue, the AI Assistant now opens a beautifully designed, structured mini-form inside the chat (Issue Type, Room, Day, Time, Description). This ensures admins receive highly actionable, standardized data in their queries tab.
+- **Gemini Database Function Calling**: Overhauled the `/api/chat/ask` route to integrate Google Gemini Function Calling (Tools). The AI Assistant can now dynamically execute `searchTimetable` backend functions to peek into the Supabase database. Instead of static text, it answers complex queries like *"DDS5A ke kitne lectures hain?"* or *"H509 free hai kya?"* with accurate, real-time data directly translated into natural language, without ever leaking raw JSON structures to the user.
+
 ---
 
 ## Challenges Faced & How We Solved Them

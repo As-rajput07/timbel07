@@ -6,7 +6,11 @@ import FinderPage from './pages/FinderPage'
 import ClassTimetablePage from './pages/ClassTimetablePage'
 import AdminPage from './pages/AdminPage'
 import TeacherStatusPage from './pages/TeacherStatusPage'
+import ProfilePage from './pages/ProfilePage'
 import AIAssistantWidget from './components/AIAssistantWidget'
+import SendiYouPage from './pages/SendiYouPage'
+import PostDetailPage from './pages/PostDetailPage'
+import ChatPage from './pages/ChatPage'
 
 function App() {
   return (
@@ -19,6 +23,10 @@ function App() {
           <Route path="/finder" element={<FinderPage />} />
           <Route path="/classes" element={<ClassTimetablePage />} />
           <Route path="/teachers" element={<TeacherStatusPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/sendiyou" element={<SendiYouPage />} />
+          <Route path="/sendiyou/post/:postId" element={<PostDetailPage />} />
+          <Route path="/chat/:chatId" element={<ChatPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
