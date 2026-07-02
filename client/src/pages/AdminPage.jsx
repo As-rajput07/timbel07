@@ -19,7 +19,7 @@ export default function AdminPage() {
   const fileInputRef = useRef(null)
 
   // AI Resolve Queries State
-  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'add-slot' | 'manage-slots' | 'queries'
+  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'add-slot' | 'manage-slots' | 'delete-class' | 'queries'
   const [issues, setIssues] = useState([])
   const [loadingIssues, setLoadingIssues] = useState(false)
   const [aiAnalysis, setAiAnalysis] = useState('')
@@ -73,9 +73,20 @@ export default function AdminPage() {
   const [showEditTeacherDrop, setShowEditTeacherDrop] = useState(false)
   const [showEditClassCodeDrop, setShowEditClassCodeDrop] = useState(false)
 
+  // Delete Class Timetable State
+  const [deleteClassCode, setDeleteClassCode] = useState('')
+  const [deleteClassCodeSearch, setDeleteClassCodeSearch] = useState('')
+  const [showDeleteClassCodeDrop, setShowDeleteClassCodeDrop] = useState(false)
+  const [deleteClassSection, setDeleteClassSection] = useState('')
+  const [deleteClassSlotCount, setDeleteClassSlotCount] = useState(null)
+  const [deleteClassCountLoading, setDeleteClassCountLoading] = useState(false)
+  const [deleteClassConfirm, setDeleteClassConfirm] = useState(false)
+  const [deleteClassLoading, setDeleteClassLoading] = useState(false)
+  const [deleteClassMsg, setDeleteClassMsg] = useState(null)
+
   useEffect(() => {
     if (token && activeTab === 'queries') fetchIssues()
-    if (token && (activeTab === 'add-slot' || activeTab === 'manage-slots') && metadata.subjects.length === 0) fetchMetadata()
+    if (token && (activeTab === 'add-slot' || activeTab === 'manage-slots' || activeTab === 'delete-class') && metadata.subjects.length === 0) fetchMetadata()
   }, [token, activeTab])
 
   const fetchMetadata = async () => {
@@ -427,6 +438,12 @@ export default function AdminPage() {
             onClick={() => setActiveTab('manage-slots')}
           >
             <Trash2 size={15} /> Manage Slots
+          </button>
+          <button
+            className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'delete-class' ? 'border-b-2 border-amber-500 text-amber-500' : 'text-text-muted hover:text-text-primary'}`}
+            onClick={() => setActiveTab('delete-class')}
+          >
+            <XCircle size={15} /> Delete Class
           </button>
           <button
             className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'queries' ? 'border-b-2 border-violet-primary text-violet-primary' : 'text-text-muted hover:text-text-primary'}`}
@@ -1181,7 +1198,152 @@ export default function AdminPage() {
             )}
           </div>
         )}
+        {/* ══════════ DELETE CLASS TAB ══════════ */}
+        {activeTab === 'delete-class' && (
+          <div className="space-y-6">
+            <div className="glass-card p-6" style={{ border: '1px solid rgba(245,158,11,0.3)' }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <XCircle className="text-amber-500" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-text-primary text-lg">Delete Class Timetable</h3>
+                  <p className="text-text-muted text-sm">Permanently delete all timetable slots for a specific class (with optional section filter).</p>
+                </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                {/* Class Code Searchable Dropdown */}
+                <div className="relative">
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Class Code *</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="e.g. MLAI3C, CS3"
+                      value={deleteClassCodeSearch || deleteClassCode}
+                      onChange={e => { setDeleteClassCodeSearch(e.target.value); setDeleteClassCode(e.target.value.toUpperCase()); setShowDeleteClassCodeDrop(true); setDeleteClassSlotCount(null); setDeleteClassConfirm(false); setDeleteClassMsg(null); }}
+                      onFocus={() => setShowDeleteClassCodeDrop(true)}
+                      onBlur={() => setTimeout(() => setShowDeleteClassCodeDrop(false), 200)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors pr-10"
+                    />
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                  </div>
+                  {showDeleteClassCodeDrop && metadata.classCodes.filter(c => c.toLowerCase().includes((deleteClassCodeSearch || deleteClassCode).toLowerCase())).length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-card border border-slate-border rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto">
+                      {metadata.classCodes
+                        .filter(c => c.toLowerCase().includes((deleteClassCodeSearch || deleteClassCode).toLowerCase()))
+                        .map((c, i) => (
+                          <div key={i}
+                            className="px-4 py-2.5 hover:bg-slate-deeper cursor-pointer text-text-primary text-sm border-b border-slate-border/40 last:border-0"
+                            onMouseDown={() => { setDeleteClassCode(c); setDeleteClassCodeSearch(''); setShowDeleteClassCodeDrop(false); setDeleteClassSlotCount(null); setDeleteClassConfirm(false); setDeleteClassMsg(null); }}
+                          >{c}</div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Section Filter (optional) */}
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1.5 uppercase tracking-wider">Section (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. A, B — leave blank to delete ALL sections"
+                    value={deleteClassSection}
+                    onChange={e => { setDeleteClassSection(e.target.value.toUpperCase()); setDeleteClassSlotCount(null); setDeleteClassConfirm(false); setDeleteClassMsg(null); }}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-deeper border border-slate-border text-text-primary placeholder-text-muted focus:outline-none focus:border-amber-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Preview Button */}
+              <button
+                disabled={!deleteClassCode || deleteClassCountLoading}
+                onClick={async () => {
+                  setDeleteClassCountLoading(true);
+                  setDeleteClassMsg(null);
+                  try {
+                    const params = deleteClassSection ? `?section=${deleteClassSection}` : '';
+                    const res = await fetch(`/api/admin/class-slot-count/${deleteClassCode}${params}`, {
+                      headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (res.ok) { setDeleteClassSlotCount(data.count); setDeleteClassConfirm(false); }
+                    else alert(data.error || 'Failed to count slots');
+                  } catch(e) { console.error(e); }
+                  finally { setDeleteClassCountLoading(false); }
+                }}
+                className="w-full py-3 rounded-full font-semibold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-40"
+                style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.4)' }}
+              >
+                {deleteClassCountLoading ? <><Lottie animationData={loaderAnimation} className="w-5 h-5" /> Counting...</> : <><Search size={16} /> Preview Slots to Delete</>}
+              </button>
+
+              {/* Preview Result + Confirm */}
+              {deleteClassSlotCount !== null && (
+                <div className="mt-5 p-4 rounded-2xl" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  <p className="text-amber-400 font-bold text-base mb-1">
+                    {deleteClassSlotCount > 0
+                      ? `⚠️ ${deleteClassSlotCount} slot(s) found for class "${deleteClassCode}"${deleteClassSection ? ` Section ${deleteClassSection}` : ' (All Sections)'}.`
+                      : `✅ No slots found for "${deleteClassCode}"${deleteClassSection ? ` Section ${deleteClassSection}` : ''}.`
+                    }
+                  </p>
+                  {deleteClassSlotCount > 0 && (
+                    <>
+                      <p className="text-text-muted text-sm mb-4">This action is <span className="text-red-busy font-bold">irreversible</span>. All {deleteClassSlotCount} slots will be permanently deleted from the database.</p>
+                      {!deleteClassConfirm ? (
+                        <button
+                          onClick={() => setDeleteClassConfirm(true)}
+                          className="px-6 py-2 rounded-full bg-red-busy/10 text-red-busy border border-red-busy/30 text-sm font-bold hover:bg-red-busy/20 transition-colors"
+                        >
+                          I understand, proceed to delete
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => setDeleteClassConfirm(false)} className="px-4 py-2 rounded-full bg-slate-border text-text-primary text-sm font-semibold hover:bg-slate-border/80 transition-colors">Cancel</button>
+                          <button
+                            disabled={deleteClassLoading}
+                            onClick={async () => {
+                              setDeleteClassLoading(true);
+                              setDeleteClassMsg(null);
+                              try {
+                                const params = deleteClassSection ? `?section=${deleteClassSection}` : '';
+                                const res = await fetch(`/api/admin/class-timetable/${deleteClassCode}${params}`, {
+                                  method: 'DELETE',
+                                  headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                  setDeleteClassMsg({ type: 'success', text: `✅ Successfully deleted all slots for "${deleteClassCode}"${deleteClassSection ? ` Section ${deleteClassSection}` : ''}.` });
+                                  setDeleteClassCode('');
+                                  setDeleteClassSection('');
+                                  setDeleteClassSlotCount(null);
+                                  setDeleteClassConfirm(false);
+                                } else {
+                                  setDeleteClassMsg({ type: 'error', text: data.error || 'Delete failed.' });
+                                }
+                              } catch(e) { setDeleteClassMsg({ type: 'error', text: 'Network error.' }); }
+                              finally { setDeleteClassLoading(false); }
+                            }}
+                            className="px-6 py-2 rounded-full bg-red-busy text-white text-sm font-bold hover:bg-red-busy/90 transition-colors disabled:opacity-50"
+                          >
+                            {deleteClassLoading ? 'Deleting...' : `🗑️ Confirm DELETE ${deleteClassSlotCount} Slots`}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Final Message */}
+              {deleteClassMsg && (
+                <div className={`mt-4 p-4 rounded-xl text-sm font-semibold ${deleteClassMsg.type === 'success' ? 'bg-emerald-free/10 text-emerald-free border border-emerald-free/30' : 'bg-red-busy/10 text-red-busy border border-red-busy/30'}`}>
+                  {deleteClassMsg.text}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {activeTab === 'queries' && (
           <div className="space-y-6">
             <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4">

@@ -534,5 +534,70 @@ router.put('/slots/:id', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/admin/class-timetable/:classCode
+ * Deletes ALL timetable slots for a given class code.
+ * Optional query param: ?section=A to delete only a specific section.
+ */
+router.delete('/class-timetable/:classCode', authMiddleware, async (req, res) => {
+  try {
+    const { classCode } = req.params;
+    const { section } = req.query;
+
+    if (!classCode) return res.status(400).json({ error: 'Class code is required' });
+
+    const db = getSupabase();
+
+    let query = db
+      .from('timetable_slots')
+      .delete()
+      .eq('class_code', classCode.trim().toUpperCase());
+
+    if (section && section.trim()) {
+      query = query.eq('section', section.trim().toUpperCase());
+    }
+
+    const { error, count } = await query;
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ success: true, deletedCount: count });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete class timetable' });
+  }
+});
+
+/**
+ * GET /api/admin/class-slot-count/:classCode
+ * Returns count of slots for a class code (with optional section filter).
+ */
+router.get('/class-slot-count/:classCode', authMiddleware, async (req, res) => {
+  try {
+    const { classCode } = req.params;
+    const { section } = req.query;
+
+    const db = getSupabase();
+
+    let query = db
+      .from('timetable_slots')
+      .select('id', { count: 'exact', head: true })
+      .eq('class_code', classCode.trim().toUpperCase());
+
+    if (section && section.trim()) {
+      query = query.eq('section', section.trim().toUpperCase());
+    }
+
+    const { count, error } = await query;
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ count: count || 0 });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to count slots' });
+  }
+});
+
 module.exports = router;
 
