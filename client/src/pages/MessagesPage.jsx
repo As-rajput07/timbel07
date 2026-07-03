@@ -230,7 +230,11 @@ export default function MessagesPage() {
             ) : (
               <div className="space-y-4">
                 {myPosts.map(post => (
-                  <div key={post.id} className="glass-card p-5 hover:border-slate-border/80 transition-all flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                  <div 
+                    key={post.id} 
+                    onClick={() => navigate(`/sendiyou/post/${post.id}`)}
+                    className="glass-card p-5 cursor-pointer hover:border-violet-primary/50 transition-all hover:-translate-y-0.5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between group"
+                  >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-deeper text-text-secondary border border-slate-border">
@@ -246,7 +250,7 @@ export default function MessagesPage() {
                         )}
                       </div>
                       
-                      <h3 className="text-lg font-bold text-text-primary truncate mb-1">
+                      <h3 className="text-lg font-bold text-text-primary truncate mb-1 group-hover:text-violet-primary transition-colors">
                         {post.title}
                       </h3>
                       <p className="text-sm text-text-secondary truncate pr-8">{post.description}</p>
@@ -254,7 +258,7 @@ export default function MessagesPage() {
                     
                     <div className="shrink-0 flex items-center gap-3">
                       <button 
-                        onClick={() => handleDeletePost(post.id)}
+                        onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id); }}
                         className="px-4 py-2 bg-red-busy/10 hover:bg-red-busy text-red-busy hover:text-white rounded-xl text-sm font-bold transition-colors"
                       >
                         Delete Post
