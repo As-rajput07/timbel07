@@ -101,9 +101,9 @@ const ChatPage = () => {
     };
   }, [chatId]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom without shifting the whole page
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
 
   const handleSendMessage = async (e) => {
