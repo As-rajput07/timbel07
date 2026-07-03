@@ -480,11 +480,7 @@ const SendiYouPage = () => {
                   <p className="text-text-secondary text-xs mb-4 line-clamp-2 leading-relaxed">{post.description}</p>
 
                   {/* Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-border/30">
-                    <div className="flex items-center gap-3 text-text-muted text-xs">
-                      <span className="flex items-center gap-1"><Star size={12} className="text-amber-400" /> 0.0</span>
-                      <span className="flex items-center gap-1"><MessageCircle size={12} /> 0</span>
-                    </div>
+                  <div className="flex items-center justify-end pt-3 border-t border-slate-border/30">
                     <button onClick={(e) => { e.stopPropagation(); if (canConnect) handleStartChat(post); }}
                       className={`px-4 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5 transition-all ${canConnect ? 'hover:scale-105 active:scale-95' : 'opacity-60 cursor-not-allowed'}`}
                       style={{ background: canConnect ? 'linear-gradient(135deg, #ec4899, #a855f7)' : '#334155' }}>
