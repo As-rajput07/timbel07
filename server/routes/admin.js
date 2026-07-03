@@ -711,5 +711,32 @@ router.delete('/sendiyou/posts/:id', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/admin/sendiyou/chats/:chatId/messages
+ * Fetch all messages for a specific chat room
+ */
+router.get('/sendiyou/chats/:chatId/messages', authMiddleware, async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    if (!chatId) return res.status(400).json({ error: 'Chat ID is required' });
+
+    const db = getSupabase();
+    const { data, error } = await db
+      .from('messages')
+      .select(`
+        *,
+        users ( name, enrollment_number )
+      `)
+      .eq('chat_id', chatId)
+      .order('created_at', { ascending: true });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ messages: data || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch chat messages' });
+  }
+});
+
 module.exports = router;
 

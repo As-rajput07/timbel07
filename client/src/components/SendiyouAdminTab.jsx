@@ -8,6 +8,11 @@ export default function SendiyouAdminTab({ token }) {
   const [posts, setPosts] = useState([])
   const [expandedPostId, setExpandedPostId] = useState(null)
   
+  // Chat viewer states
+  const [chatMessages, setChatMessages] = useState({})
+  const [loadingMessagesId, setLoadingMessagesId] = useState(null)
+  const [expandedChatId, setExpandedChatId] = useState(null)
+  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -101,6 +106,31 @@ export default function SendiyouAdminTab({ token }) {
       setPosts(prev => prev.filter(p => p.id !== postId))
     } catch (err) {
       alert(err.message)
+    }
+  }
+
+  const handleToggleChatLog = async (chatId) => {
+    if (expandedChatId === chatId) {
+      setExpandedChatId(null)
+      return
+    }
+    
+    setExpandedChatId(chatId)
+    if (chatMessages[chatId]) return // Already fetched
+
+    setLoadingMessagesId(chatId)
+    try {
+      const res = await fetch(`/api/admin/sendiyou/chats/${chatId}/messages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setChatMessages(prev => ({ ...prev, [chatId]: data.messages }))
+    } catch (err) {
+      console.error(err)
+      alert('Failed to fetch chat messages')
+    } finally {
+      setLoadingMessagesId(null)
     }
   }
 
@@ -269,13 +299,47 @@ export default function SendiyouAdminTab({ token }) {
                           </h5>
                           
                           {post.chats?.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-3">
                               {post.chats.map(chat => (
-                                <div key={chat.id} className="p-3 bg-slate-deeper rounded-lg border border-slate-border flex items-center justify-between">
-                                  <div>
-                                    <div className="text-sm font-semibold text-text-primary">Chat Room</div>
-                                    <div className="text-xs text-text-muted mt-0.5">{chat.participant_ids?.length || 0} Participants joined</div>
+                                <div key={chat.id} className="p-3 bg-slate-deeper rounded-lg border border-slate-border flex flex-col">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <div className="text-sm font-semibold text-text-primary">Chat Room</div>
+                                      <div className="text-xs text-text-muted mt-0.5">{chat.participant_ids?.length || 0} Participants joined</div>
+                                    </div>
+                                    <button 
+                                      onClick={() => handleToggleChatLog(chat.id)}
+                                      className="px-3 py-1.5 bg-violet-primary/10 text-violet-primary rounded-lg text-xs font-bold hover:bg-violet-primary/20 transition-colors flex items-center gap-1.5"
+                                    >
+                                      <MessageSquare size={14} /> 
+                                      {expandedChatId === chat.id ? 'Close Log' : 'View Log'}
+                                    </button>
                                   </div>
+                                  
+                                  {/* Messages Log Section */}
+                                  {expandedChatId === chat.id && (
+                                    <div className="mt-3 pt-3 border-t border-slate-border/50">
+                                      {loadingMessagesId === chat.id ? (
+                                        <div className="text-center text-xs text-text-muted py-4">Loading messages...</div>
+                                      ) : (
+                                        <div className="max-h-60 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                                          {chatMessages[chat.id]?.length > 0 ? (
+                                            chatMessages[chat.id].map(msg => (
+                                              <div key={msg.id} className="bg-slate-card/50 p-2.5 rounded-lg border border-slate-border/30 text-sm">
+                                                <div className="flex items-center justify-between mb-1">
+                                                  <span className="font-bold text-violet-400 text-xs">{msg.users?.name || 'Unknown'} <span className="text-[10px] text-text-muted font-normal">({msg.users?.enrollment_number})</span></span>
+                                                  <span className="text-[10px] text-text-muted">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                                </div>
+                                                <p className="text-text-primary break-words whitespace-pre-wrap">{msg.content}</p>
+                                              </div>
+                                            ))
+                                          ) : (
+                                            <div className="text-center text-xs text-text-muted py-4 bg-slate-card/30 rounded-lg">No messages in this chat yet.</div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
