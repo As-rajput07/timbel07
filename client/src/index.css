@@ -13,6 +13,11 @@
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #94A3B8;
   --color-text-muted: #64748B;
+  --color-cream: #f7f4ed;
+  --color-charcoal: #1c1c1c;
+  --color-off-white: #fcfbf8;
+  --color-muted-gray: #5f5f5d;
+  --color-border-passive: #eceae4;
   --font-heading: 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -160,4 +165,76 @@
 @utility fade-up-anim {
   animation: fade-up 0.8s ease forwards;
 }
+
+/* ─── Lovable Design System Utilities ─── */
+@utility lovable-card {
+  background: var(--color-cream);
+  border: 1px solid var(--color-border-passive);
+  border-radius: 12px;
+}
+
+@utility lovable-button-primary {
+  background: var(--color-charcoal);
+  color: var(--color-off-white);
+  padding: 8px 16px;
+  border-radius: 6px;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 0.5px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 0px 0px 0.5px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 400;
+  &:hover {
+    opacity: 0.8;
+  }
+  &:active {
+    opacity: 0.8;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  }
+}
+
+@utility lovable-button-ghost {
+  background: transparent;
+  color: var(--color-charcoal);
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(28, 28, 28, 0.4);
+  transition: opacity 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 400;
+  &:hover {
+    opacity: 0.8;
+  }
+  &:active {
+    opacity: 0.8;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  }
+}
+
+@utility lovable-input {
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+  border: 1px solid var(--color-border-passive);
+  border-radius: 6px;
+  padding: 8px 16px;
+  transition: all 0.2s;
+  &::placeholder {
+    color: var(--color-muted-gray);
+  }
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+}
+
 

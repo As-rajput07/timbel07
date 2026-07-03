@@ -222,36 +222,30 @@ const SendiYouPage = () => {
   // ─── 1. NOT AUTHENTICATED ───
   if (!user) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4 pt-24 pb-12">
+      <div className="min-h-screen bg-[var(--color-cream)] flex items-center justify-center px-4 pt-24 pb-12">
         <div className="w-full max-w-md">
-          <div className="relative overflow-hidden rounded-3xl" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1a1040 50%, #0F172A 100%)' }}>
-            {/* Decorative gradient border */}
-            <div className="absolute inset-0 rounded-3xl p-[1px]" style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4)', WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude', padding: '1.5px' }}></div>
-            
-            <div className="relative p-10 text-center">
-              {/* Animated heart */}
-              <div className="w-24 h-24 mx-auto mb-6">
-                <Lottie animationData={anim7} loop={true} />
-              </div>
-              
-              <h1 className="text-4xl font-extrabold mb-2" style={{ background: 'linear-gradient(135deg, #ec4899, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                SendiYou 💌
-              </h1>
-              <p className="text-text-secondary mb-8 text-sm leading-relaxed">
-                Connect anonymously with your campus peers.<br/>Post requests, find study partners, or send that secret message.
-              </p>
-              
-              <button
-                onClick={signInWithGoogle}
-                className="w-full py-4 px-6 bg-white text-slate-900 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-gray-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{ boxShadow: '0 0 30px rgba(236, 72, 153, 0.15)' }}
-              >
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
-                Continue with Google
-              </button>
-              
-              <p className="text-text-muted text-[11px] mt-4">Your identity stays anonymous until you choose to reveal it.</p>
+          <div className="relative overflow-hidden lovable-card p-10 text-center">
+            {/* Animated heart */}
+            <div className="w-24 h-24 mx-auto mb-6">
+              <Lottie animationData={anim7} loop={true} />
             </div>
+            
+            <h1 className="text-4xl font-semibold mb-2 tracking-tight text-[var(--color-charcoal)]">
+              SendiYou 💌
+            </h1>
+            <p className="text-[var(--color-muted-gray)] mb-8 text-sm leading-relaxed">
+              Connect anonymously with your campus peers.<br/>Post requests, find study partners, or send that secret message.
+            </p>
+            
+            <button
+              onClick={signInWithGoogle}
+              className="w-full lovable-button-ghost py-4 flex items-center justify-center gap-3 font-medium text-base"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+              Continue with Google
+            </button>
+            
+            <p className="text-[var(--color-muted-gray)] text-[11px] mt-4 opacity-70">Your identity stays anonymous until you choose to reveal it.</p>
           </div>
         </div>
       </div>
@@ -261,56 +255,56 @@ const SendiYouPage = () => {
   // ─── 2. ONBOARDING ───
   if (!profile) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4 pt-24 pb-12">
+      <div className="min-h-screen bg-[var(--color-cream)] flex items-center justify-center px-4 pt-24 pb-12">
         <div className="w-full max-w-lg">
-          <div className="rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(180deg, #0F172A 0%, #1a1040 100%)', border: '1px solid rgba(139,92,246,0.2)' }}>
+          <div className="lovable-card">
             <div className="p-8">
               <div className="flex items-center gap-3 mb-2">
                 <Heart className="text-pink-400" size={22} />
-                <h2 className="text-2xl font-extrabold text-text-primary">SendiYou Connection Details</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-[var(--color-charcoal)]">SendiYou Connection Details</h2>
               </div>
-              <p className="text-text-muted text-sm mb-8">Set up your anonymous campus connection request. Your real identity can optionally be hidden.</p>
+              <p className="text-[var(--color-muted-gray)] text-sm mb-8">Set up your anonymous campus connection request. Your real identity can optionally be hidden.</p>
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl text-sm mb-6">{error}</div>
+                <div className="bg-red-50 text-red-600 border border-red-200 p-3 rounded-md text-sm mb-6">{error}</div>
               )}
 
               <form onSubmit={handleOnboardingSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-text-primary mb-2">Full Name <span className="text-pink-400">*</span></label>
+                  <label className="block text-sm font-semibold text-[var(--color-charcoal)] mb-2">Full Name <span className="text-pink-500">*</span></label>
                   <input type="text" required readOnly
-                    className="w-full bg-slate-deeper/50 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-muted cursor-not-allowed focus:outline-none transition-all"
+                    className="w-full lovable-input cursor-not-allowed opacity-70"
                     value={formData.name}
                     placeholder="Auto-captured from Google Account" />
-                  <p className="text-text-muted text-xs mt-1.5">This name is securely verified via your Google Account.</p>
+                  <p className="text-[var(--color-muted-gray)] text-xs mt-1.5">This name is securely verified via your Google Account.</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-text-primary mb-2">Branch/Program <span className="text-pink-400">*</span></label>
+                  <label className="block text-sm font-semibold text-[var(--color-charcoal)] mb-2">Branch/Program <span className="text-pink-500">*</span></label>
                   <input type="text" required
-                    className="w-full bg-slate-darker/80 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-violet-primary/50 focus:ring-1 focus:ring-violet-primary/20 transition-all"
+                    className="w-full lovable-input"
                     value={formData.branch} onChange={(e) => setFormData({...formData, branch: e.target.value})}
                     placeholder="e.g., Computer Science" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-text-primary mb-2">Enrollment Number <span className="text-pink-400">*</span></label>
+                  <label className="block text-sm font-semibold text-[var(--color-charcoal)] mb-2">Enrollment Number <span className="text-pink-500">*</span></label>
                   <input type="text" required readOnly
-                    className="w-full bg-slate-deeper/50 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-muted cursor-not-allowed focus:outline-none transition-all"
+                    className="w-full lovable-input cursor-not-allowed opacity-70"
                     value={formData.enrollment_number}
                     placeholder="Auto-extracted from email" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-text-primary mb-3">Gender</label>
+                  <label className="block text-sm font-semibold text-[var(--color-charcoal)] mb-3">Gender</label>
                   <div className="flex gap-3">
                     {['Male', 'Female', 'Other'].map(g => (
                       <button key={g} type="button"
                         onClick={() => setFormData({...formData, gender: g})}
-                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border ${
+                        className={`flex-1 py-3 rounded-md text-sm font-medium transition-all border ${
                           formData.gender === g
-                            ? 'bg-violet-primary/15 border-violet-primary/50 text-violet-primary shadow-[0_0_12px_rgba(139,92,246,0.15)]'
-                            : 'bg-slate-darker/50 border-slate-border/30 text-text-secondary hover:border-slate-border'
+                            ? 'bg-[var(--color-charcoal)] text-[var(--color-off-white)] border-[var(--color-charcoal)] shadow-[rgba(255,255,255,0.2)_0px_0.5px_0px_0px_inset,rgba(0,0,0,0.2)_0px_0px_0px_0.5px_inset,rgba(0,0,0,0.05)_0px_1px_2px_0px]'
+                            : 'bg-transparent border-[var(--color-border-passive)] text-[var(--color-charcoal)] hover:border-[rgba(28,28,28,0.4)]'
                         }`}>
                         {g === 'Male' ? '👨' : g === 'Female' ? '👩' : '🌈'} {g}
                       </button>
@@ -319,8 +313,7 @@ const SendiYouPage = () => {
                 </div>
 
                 <button type="submit" disabled={submitting}
-                  className="w-full py-4 mt-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 text-white"
-                  style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', boxShadow: '0 0 25px rgba(139,92,246,0.3)' }}>
+                  className="w-full mt-4 lovable-button-primary py-4 font-semibold text-base w-full">
                   {submitting ? 'Saving...' : 'Enter SendiYou 💌'}
                   {!submitting && <ChevronRight size={18} />}
                 </button>
@@ -334,189 +327,182 @@ const SendiYouPage = () => {
 
   // ─── 3. MAIN FEED ───
   return (
-    <div className="container mx-auto px-4 pt-24 pb-12 max-w-5xl relative">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #ec4899, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            💌 SendiYou
-          </h1>
-          <p className="text-text-muted text-sm mt-1">{filteredPosts.length} service{filteredPosts.length !== 1 ? 's' : ''} found</p>
-        </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          {/* Search */}
-          <div className="relative flex-1 md:w-64">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input type="text" placeholder="Search posts..." value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-deeper/80 border border-slate-border/30 rounded-xl pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-violet-primary/40 transition-colors" />
+    <div className="min-h-screen bg-[var(--color-cream)] text-[var(--color-charcoal)]">
+      <div className="container mx-auto px-4 pt-24 pb-12 max-w-5xl relative">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold flex items-center gap-2 text-[var(--color-charcoal)]">
+              💌 SendiYou
+            </h1>
+            <p className="text-[var(--color-muted-gray)] text-sm mt-1">{filteredPosts.length} service{filteredPosts.length !== 1 ? 's' : ''} found</p>
           </div>
-          <button onClick={() => { setShowModal(true); setStep(1); }}
-            className="px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 text-white text-sm transition-all hover:scale-[1.03] active:scale-[0.97] shrink-0"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', boxShadow: '0 0 20px rgba(139,92,246,0.25)' }}>
-            <Sparkles size={16} /> Post Service
-          </button>
-          {/* Profile with Dropdown */}
-          <div className="relative">
-            <button onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="w-10 h-10 rounded-full overflow-hidden border-2 border-violet-primary/30 shrink-0 cursor-pointer hover:border-violet-primary/60 transition-all">
-              {profile.custom_avatar_url || user.user_metadata?.avatar_url
-                ? <img src={profile.custom_avatar_url || user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                : <div className="w-full h-full bg-violet-primary/20 flex items-center justify-center text-violet-primary font-bold text-sm">{profile.name.charAt(0).toUpperCase()}</div>
-              }
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            {/* Search */}
+            <div className="relative flex-1 md:w-64">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-gray)]" />
+              <input type="text" placeholder="Search posts..." value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full lovable-input pl-9" />
+            </div>
+            <button onClick={() => { setShowModal(true); setStep(1); }}
+              className="lovable-button-primary shrink-0">
+              <Sparkles size={16} /> Post Service
             </button>
-            {showProfileMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
-                <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl overflow-hidden shadow-2xl"
-                  style={{ background: '#0F172A', border: '1px solid rgba(139,92,246,0.25)' }}>
-                  <div className="p-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.08))' }}>
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-violet-primary/30 shrink-0">
-                      {profile.custom_avatar_url || user.user_metadata?.avatar_url
-                        ? <img src={profile.custom_avatar_url || user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                        : <div className="w-full h-full bg-violet-primary/20 flex items-center justify-center text-violet-primary font-bold text-sm">{profile.name.charAt(0).toUpperCase()}</div>
-                      }
+            {/* Profile with Dropdown */}
+            <div className="relative">
+              <button onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="w-10 h-10 rounded-full overflow-hidden border border-[var(--color-border-passive)] shrink-0 cursor-pointer hover:border-[rgba(28,28,28,0.4)] transition-all">
+                {profile.custom_avatar_url || user.user_metadata?.avatar_url
+                  ? <img src={profile.custom_avatar_url || user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  : <div className="w-full h-full bg-transparent flex items-center justify-center text-[var(--color-charcoal)] font-semibold text-sm">{profile.name.charAt(0).toUpperCase()}</div>
+                }
+              </button>
+              {showProfileMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+                  <div className="absolute right-0 top-12 z-50 w-64 lovable-card overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
+                    <div className="p-4 flex items-center gap-3 border-b border-[var(--color-border-passive)] bg-transparent">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border border-[var(--color-border-passive)] shrink-0">
+                        {profile.custom_avatar_url || user.user_metadata?.avatar_url
+                          ? <img src={profile.custom_avatar_url || user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                          : <div className="w-full h-full bg-transparent flex items-center justify-center text-[var(--color-charcoal)] font-semibold text-sm">{profile.name.charAt(0).toUpperCase()}</div>
+                        }
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[var(--color-charcoal)] truncate">{profile.name}</p>
+                        <p className="text-[11px] text-[var(--color-muted-gray)] truncate">{user.email}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-text-primary truncate">{profile.name}</p>
-                      <p className="text-[11px] text-text-muted truncate">{user.email}</p>
+                    <div className="p-2 space-y-1">
+                      <div className="px-3 py-2 text-xs text-[var(--color-muted-gray)] mb-2">
+                        <span className="font-semibold text-[var(--color-charcoal)]">{profile.branch}</span> · {profile.gender}
+                      </div>
+                      <button onClick={() => { setShowProfileMenu(false); navigate('/profile'); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-[var(--color-charcoal)] hover:bg-[rgba(28,28,28,0.04)] transition-colors">
+                        <UserCircle size={16} /> View Profile
+                      </button>
+                      <button onClick={() => { setShowProfileMenu(false); signOut(); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                        <LogOut size={16} /> Logout
+                      </button>
                     </div>
                   </div>
-                  <div className="p-2 space-y-1">
-                    <div className="px-3 py-2 text-xs text-text-muted mb-2">
-                      <span className="font-semibold text-text-secondary">{profile.branch}</span> · {profile.gender}
-                    </div>
-                    <button onClick={() => { setShowProfileMenu(false); navigate('/profile'); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-text-primary hover:bg-white/5 transition-colors">
-                      <UserCircle size={16} /> View Profile
-                    </button>
-                    <button onClick={() => { setShowProfileMenu(false); signOut(); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors">
-                      <LogOut size={16} /> Logout
-                    </button>
-                  </div>
-                </div>
-              </>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Feed */}
+        {fetchingPosts ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="w-12 h-12 animate-spin rounded-full border-t-4 border-[var(--color-charcoal)] border-r-4 border-r-transparent"></div>
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-32 h-32 mx-auto mb-6 opacity-60"><Lottie animationData={anim9} loop={true} /></div>
+            <h2 className="text-2xl font-semibold text-[var(--color-charcoal)] mb-2">{searchQuery ? 'No results found' : 'Feed is Empty'}</h2>
+            <p className="text-[var(--color-muted-gray)] mb-6">{searchQuery ? 'Try a different search term.' : 'Be the first to post a connection request!'}</p>
+            {!searchQuery && (
+              <button onClick={() => { setShowModal(true); setStep(1); }}
+                className="lovable-button-primary">
+                Create a Post
+              </button>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Feed */}
-      {fetchingPosts ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="w-12 h-12 animate-spin rounded-full border-t-4 border-violet-primary border-r-4 border-r-transparent"></div>
-        </div>
-      ) : filteredPosts.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-32 h-32 mx-auto mb-6 opacity-60"><Lottie animationData={anim9} loop={true} /></div>
-          <h2 className="text-2xl font-bold text-text-primary mb-2">{searchQuery ? 'No results found' : 'Feed is Empty'}</h2>
-          <p className="text-text-secondary mb-6">{searchQuery ? 'Try a different search term.' : 'Be the first to post a connection request!'}</p>
-          {!searchQuery && (
-            <button onClick={() => { setShowModal(true); setStep(1); }}
-              className="px-6 py-3 rounded-xl font-bold text-white text-sm"
-              style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
-              Create a Post
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPosts.map((post) => {
-            const animId = ANIMATIONS.find(a => a.id === post.selected_animation) || ANIMATIONS[6]; // fallback to anim7
-            const postDisplayName = post.is_anonymous ? (post.display_name || 'Anonymous') : (post.display_name || post.users?.name || 'Unknown');
-            const canConnect = post.preferred_gender === 'Any' || post.preferred_gender === profile?.gender;
-            
-            return (
-              <div key={post.id} 
-                onClick={() => navigate(`/sendiyou/post/${post.id}`)}
-                className="group rounded-2xl overflow-hidden transition-all hover:scale-[1.02] hover:shadow-[0_8px_40px_rgba(139,92,246,0.12)] cursor-pointer"
-                style={{ background: '#0F172A', border: '1px solid rgba(51,65,85,0.4)' }}>
-                {/* Card top - pink gradient with animation */}
-                <div className="relative h-44 flex items-center justify-center overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(168,85,247,0.08))' }}>
-                  <span className="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full text-pink-400"
-                    style={{ background: 'rgba(236,72,153,0.15)', border: '1px solid rgba(236,72,153,0.2)' }}>
-                    SendiYou
-                  </span>
-                  <div className="w-28 h-28">
-                    <Lottie animationData={animId.data} loop={true} />
-                  </div>
-                </div>
-
-                {/* Card body */}
-                <div className="p-5">
-                  {/* User info */}
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', color: 'white' }}>
-                      {post.is_anonymous && !post.display_name ? '?' : postDisplayName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-text-primary leading-tight">
-                        {postDisplayName}
-                      </p>
-                      <p className="text-[11px] text-text-muted">{post.users?.branch || 'campus'}</p>
-                    </div>
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/20">
-                      ★ Preferred: {post.preferred_gender}
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPosts.map((post) => {
+              const animId = ANIMATIONS.find(a => a.id === post.selected_animation) || ANIMATIONS[6]; // fallback to anim7
+              const postDisplayName = post.is_anonymous ? (post.display_name || 'Anonymous') : (post.display_name || post.users?.name || 'Unknown');
+              const canConnect = post.preferred_gender === 'Any' || post.preferred_gender === profile?.gender;
+              
+              return (
+                <div key={post.id} 
+                  onClick={() => navigate(`/sendiyou/post/${post.id}`)}
+                  className="lovable-card cursor-pointer group hover:border-[rgba(28,28,28,0.4)] transition-all overflow-hidden relative">
+                  {/* Card top - subtle wash */}
+                  <div className="relative h-44 flex items-center justify-center overflow-hidden bg-[rgba(28,28,28,0.03)] border-b border-[var(--color-border-passive)]">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-md text-[var(--color-charcoal)] bg-white border border-[var(--color-border-passive)] shadow-sm">
+                      SendiYou
                     </span>
-                    {post.is_anonymous && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-violet-primary/10 text-violet-primary border border-violet-primary/20">
-                        🔒 Incognito
+                    <div className="w-28 h-28">
+                      <Lottie animationData={animId.data} loop={true} />
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-5">
+                    {/* User info */}
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 bg-white border border-[var(--color-border-passive)] text-[var(--color-charcoal)]">
+                        {post.is_anonymous && !post.display_name ? '?' : postDisplayName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--color-charcoal)] leading-tight">
+                          {postDisplayName}
+                        </p>
+                        <p className="text-[11px] text-[var(--color-muted-gray)]">{post.users?.branch || 'campus'}</p>
+                      </div>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
+                        ★ Preferred: {post.preferred_gender}
                       </span>
-                    )}
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-free/10 text-emerald-free border border-emerald-free/20">
-                      {post.connection_type}
-                    </span>
-                  </div>
+                      {post.is_anonymous && (
+                        <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
+                          🔒 Incognito
+                        </span>
+                      )}
+                      <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
+                        {post.connection_type}
+                      </span>
+                    </div>
 
-                  {/* Title & Description */}
-                  <h3 className="font-bold text-text-primary mb-1.5 text-[15px] leading-snug line-clamp-1">{post.title}</h3>
-                  <p className="text-text-secondary text-xs mb-4 line-clamp-2 leading-relaxed">{post.description}</p>
+                    {/* Title & Description */}
+                    <h3 className="font-semibold text-[var(--color-charcoal)] mb-1.5 text-[15px] leading-snug line-clamp-1">{post.title}</h3>
+                    <p className="text-[var(--color-muted-gray)] text-xs mb-4 line-clamp-2 leading-relaxed">{post.description}</p>
 
-                  {/* Footer */}
-                  <div className="flex items-center justify-end pt-3 border-t border-slate-border/30">
-                    <button onClick={(e) => { e.stopPropagation(); if (canConnect) handleStartChat(post); }}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5 transition-all ${canConnect ? 'hover:scale-105 active:scale-95' : 'opacity-60 cursor-not-allowed'}`}
-                      style={{ background: canConnect ? 'linear-gradient(135deg, #ec4899, #a855f7)' : '#334155' }}>
-                      {canConnect ? 'Connect' : 'Locked'} <ArrowRight size={12} />
-                    </button>
+                    {/* Footer */}
+                    <div className="flex items-center justify-end pt-3 border-t border-[var(--color-border-passive)]">
+                      <button onClick={(e) => { e.stopPropagation(); if (canConnect) handleStartChat(post); }}
+                        className={`text-sm font-medium flex items-center gap-1.5 transition-all ${canConnect ? 'text-[var(--color-charcoal)] hover:opacity-70' : 'text-[var(--color-muted-gray)] cursor-not-allowed opacity-50'}`}>
+                        {canConnect ? 'Connect' : 'Locked'} <ArrowRight size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* ═══ CREATE POST MODAL ═══ */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(6,12,32,0.85)', backdropFilter: 'blur(8px)' }}>
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl"
-            style={{ background: 'linear-gradient(180deg, #0F172A 0%, #131b35 100%)', border: '1px solid rgba(139,92,246,0.2)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(28,28,28,0.4)] backdrop-blur-sm">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto lovable-card shadow-2xl">
 
             {/* Modal Header */}
-            <div className="sticky top-0 z-10 flex justify-between items-center p-6 pb-4 rounded-t-3xl" style={{ background: 'linear-gradient(180deg, #0F172A, transparent)' }}>
-              <h2 className="text-xl font-extrabold flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #ec4899, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <div className="sticky top-0 z-10 flex justify-between items-center p-6 pb-4 rounded-t-xl bg-[var(--color-cream)] border-b border-[var(--color-border-passive)]">
+              <h2 className="text-xl font-semibold flex items-center gap-2 text-[var(--color-charcoal)]">
                 💌 SendiYou Connection Details
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-primary transition-colors p-1">
+              <button onClick={() => setShowModal(false)} className="text-[var(--color-muted-gray)] hover:text-[var(--color-charcoal)] transition-colors p-1">
                 <X size={22} />
               </button>
             </div>
 
-            <div className="px-6 pb-6">
-              <p className="text-text-muted text-sm mb-6">Set up your anonymous campus connection request. Your real identity can optionally be hidden.</p>
+            <div className="px-6 pb-6 pt-6">
+              <p className="text-[var(--color-muted-gray)] text-sm mb-6">Set up your anonymous campus connection request. Your real identity can optionally be hidden.</p>
 
               {/* Step Indicator */}
               <div className="flex gap-2 mb-8">
                 {[1, 2, 3].map(s => (
-                  <div key={s} className="flex-1 h-1.5 rounded-full transition-all" style={{ background: s <= step ? 'linear-gradient(90deg, #ec4899, #8b5cf6)' : 'rgba(51,65,85,0.4)' }} />
+                  <div key={s} className="flex-1 h-1 rounded-full transition-all" style={{ background: s <= step ? 'var(--color-charcoal)' : 'var(--color-border-passive)' }} />
                 ))}
               </div>
 
@@ -525,48 +511,48 @@ const SendiYouPage = () => {
                 <div className="space-y-6">
                   {/* Display Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-2">Your Display Name <span className="text-pink-400">*</span></label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2">Your Display Name <span className="text-red-500">*</span></label>
                     <input type="text" required maxLength={30}
-                      className="w-full bg-slate-darker/80 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-pink-400/50 focus:ring-1 focus:ring-pink-400/20 transition-all"
+                      className="w-full lovable-input"
                       value={newPost.display_name} onChange={(e) => setNewPost({...newPost, display_name: e.target.value})}
                       placeholder="e.g. Stargazer, Campus Foodie, Night Owl..." />
-                    <p className="text-text-muted text-xs mt-1.5">This is the name shown publicly (not your real name unless you want).</p>
+                    <p className="text-[var(--color-muted-gray)] text-xs mt-1.5">This is the name shown publicly (not your real name unless you want).</p>
                   </div>
 
                   {/* Gender Preference */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-3">I want to connect with a...</label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-3">I want to connect with a...</label>
                     <div className="flex gap-3">
                       {[{ v: 'Male', icon: '👨' }, { v: 'Female', icon: '👩' }, { v: 'Any', icon: '🌈' }].map(g => (
                         <button key={g.v} type="button"
                           onClick={() => setNewPost({...newPost, preferred_gender: g.v})}
-                          className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border ${
+                          className={`flex-1 py-3 rounded-md text-sm font-medium transition-all border ${
                             newPost.preferred_gender === g.v
-                              ? 'bg-emerald-free/10 border-emerald-free/50 text-emerald-free shadow-[0_0_12px_rgba(16,185,129,0.12)]'
-                              : 'bg-slate-darker/50 border-slate-border/30 text-text-secondary hover:border-slate-border'
+                              ? 'bg-[rgba(28,28,28,0.04)] border-[rgba(28,28,28,0.4)] text-[var(--color-charcoal)] shadow-[0_0_0_1px_rgba(28,28,28,0.1)]'
+                              : 'bg-transparent border-[var(--color-border-passive)] text-[var(--color-muted-gray)] hover:border-[rgba(28,28,28,0.2)]'
                           }`}>
                           {g.icon} {g.v === 'Any' ? 'Any Gender' : g.v}
                         </button>
                       ))}
                     </div>
-                    <p className="text-text-muted text-xs mt-1.5">Only users of the selected gender can accept your connection request.</p>
+                    <p className="text-[var(--color-muted-gray)] text-xs mt-1.5">Only users of the selected gender can accept your connection request.</p>
                   </div>
 
                   {/* Connection Type */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-3">Connection Type <span className="text-pink-400">*</span></label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-3">Connection Type <span className="text-red-500">*</span></label>
                     <div className="grid grid-cols-2 gap-3">
                       {CONNECTION_TYPES.map(ct => (
                         <button key={ct.value} type="button"
                           onClick={() => setNewPost({...newPost, connection_type: ct.value})}
                           className={`p-4 rounded-xl text-left transition-all border ${
                             newPost.connection_type === ct.value
-                              ? 'bg-pink-500/8 border-pink-400/40 shadow-[0_0_15px_rgba(236,72,153,0.1)]'
-                              : 'bg-slate-darker/50 border-slate-border/30 hover:border-slate-border'
+                              ? 'bg-[rgba(28,28,28,0.04)] border-[rgba(28,28,28,0.4)] shadow-[0_0_0_1px_rgba(28,28,28,0.1)]'
+                              : 'bg-transparent border-[var(--color-border-passive)] hover:border-[rgba(28,28,28,0.2)]'
                           }`}>
                           <div className="text-2xl mb-2">{ct.icon}</div>
-                          <p className={`text-sm font-bold mb-1 ${newPost.connection_type === ct.value ? 'text-pink-400' : 'text-text-primary'}`}>{ct.label}</p>
-                          <p className="text-[11px] text-text-muted leading-relaxed">{ct.desc}</p>
+                          <p className={`text-sm font-semibold mb-1 ${newPost.connection_type === ct.value ? 'text-[var(--color-charcoal)]' : 'text-[var(--color-charcoal)]'}`}>{ct.label}</p>
+                          <p className="text-[11px] text-[var(--color-muted-gray)] leading-relaxed">{ct.desc}</p>
                         </button>
                       ))}
                     </div>
@@ -574,21 +560,21 @@ const SendiYouPage = () => {
 
                   {/* Anonymous Toggle */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-3">Hide my identity on the platform?</label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-3">Hide my identity on the platform?</label>
                     <div className="flex gap-3">
                       <button type="button" onClick={() => setNewPost({...newPost, is_anonymous: true})}
-                        className={`flex-1 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border ${
+                        className={`flex-1 py-3.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all border ${
                           newPost.is_anonymous
-                            ? 'bg-slate-deeper border-slate-border text-text-primary'
-                            : 'bg-slate-darker/50 border-slate-border/30 text-text-secondary'
+                            ? 'bg-[rgba(28,28,28,0.04)] border-[rgba(28,28,28,0.4)] text-[var(--color-charcoal)] shadow-[0_0_0_1px_rgba(28,28,28,0.1)]'
+                            : 'bg-transparent border-[var(--color-border-passive)] text-[var(--color-muted-gray)]'
                         }`}>
                         <EyeOff size={16} /> Yes, stay anonymous
                       </button>
                       <button type="button" onClick={() => setNewPost({...newPost, is_anonymous: false})}
-                        className={`flex-1 py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all border ${
+                        className={`flex-1 py-3.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all border ${
                           !newPost.is_anonymous
-                            ? 'bg-emerald-free/10 border-emerald-free/50 text-emerald-free shadow-[0_0_12px_rgba(16,185,129,0.12)]'
-                            : 'bg-slate-darker/50 border-slate-border/30 text-text-secondary'
+                            ? 'bg-[rgba(28,28,28,0.04)] border-[rgba(28,28,28,0.4)] text-[var(--color-charcoal)] shadow-[0_0_0_1px_rgba(28,28,28,0.1)]'
+                            : 'bg-transparent border-[var(--color-border-passive)] text-[var(--color-muted-gray)]'
                         }`}>
                         <Eye size={16} /> No, show my profile
                       </button>
@@ -596,8 +582,7 @@ const SendiYouPage = () => {
                   </div>
 
                   <button onClick={() => { if (newPost.display_name.trim()) setStep(2); else alert('Please enter a display name.'); }}
-                    className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-white transition-all hover:scale-[1.01] active:scale-[0.99]"
-                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}>
+                    className="w-full lovable-button-primary py-4 font-semibold text-base flex justify-center">
                     Next: Description <ChevronRight size={18} />
                   </button>
                 </div>
@@ -608,21 +593,21 @@ const SendiYouPage = () => {
                 <div className="space-y-6">
                   {/* Title */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-2">📌 Title <span className="text-pink-400">*</span></label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2">📌 Title <span className="text-red-500">*</span></label>
                     <input type="text" required maxLength={60}
-                      className="w-full bg-slate-darker/80 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-violet-primary/50 focus:ring-1 focus:ring-violet-primary/20 transition-all"
+                      className="w-full lovable-input"
                       value={newPost.title} onChange={(e) => setNewPost({...newPost, title: e.target.value})}
                       placeholder="e.g., Looking for a study partner" />
                   </div>
 
                   {/* Description */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-2">📝 Description <span className="text-pink-400">*</span></label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2">📝 Description <span className="text-red-500">*</span></label>
                     <textarea required maxLength={2000} rows={4}
-                      className="w-full bg-slate-darker/80 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-violet-primary/50 focus:ring-1 focus:ring-violet-primary/20 transition-all resize-none"
+                      className="w-full lovable-input resize-none py-3"
                       value={newPost.description} onChange={(e) => setNewPost({...newPost, description: e.target.value})}
                       placeholder="Describe your request in detail — what you're looking for, your interests, tools/methods you use..." />
-                    <div className="flex justify-between mt-1.5 text-xs text-text-muted">
+                    <div className="flex justify-between mt-1.5 text-xs text-[var(--color-muted-gray)]">
                       <span>Min 30 characters — be thorough to attract connections.</span>
                       <span>{newPost.description.length}/2000</span>
                     </div>
@@ -630,25 +615,25 @@ const SendiYouPage = () => {
 
                   {/* Tags */}
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-2">⚡ Tags <span className="text-text-muted">(optional, max 8)</span></label>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2">⚡ Tags <span className="text-[var(--color-muted-gray)]">(optional, max 8)</span></label>
                     <div className="flex gap-2">
                       <input type="text" maxLength={20}
-                        className="flex-1 bg-slate-darker/80 border border-slate-border/50 rounded-xl px-4 py-3 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-violet-primary/50 transition-all text-sm"
+                        className="flex-1 lovable-input"
                         value={tagInput} onChange={(e) => setTagInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(); } }}
                         placeholder="python, react, calculus... (press Enter or comma)" />
                       <button type="button" onClick={addTag}
-                        className="w-12 h-12 rounded-xl bg-slate-deeper border border-slate-border/50 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors">
+                        className="w-12 h-12 rounded-md lovable-button-ghost flex items-center justify-center">
                         <Plus size={18} />
                       </button>
                     </div>
-                    <p className="text-text-muted text-xs mt-1.5">Tags help students find your service faster.</p>
+                    <p className="text-[var(--color-muted-gray)] text-xs mt-1.5">Tags help students find your service faster.</p>
                     {newPost.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-3">
                         {newPost.tags.map(tag => (
-                          <span key={tag} className="px-3 py-1 rounded-full text-xs font-semibold bg-violet-primary/10 text-violet-primary border border-violet-primary/20 flex items-center gap-1.5">
+                          <span key={tag} className="px-3 py-1 rounded-md text-xs font-medium bg-[rgba(28,28,28,0.04)] border border-[var(--color-border-passive)] flex items-center gap-1.5">
                             #{tag}
-                            <button onClick={() => setNewPost({...newPost, tags: newPost.tags.filter(t => t !== tag)})} className="hover:text-pink-400 transition-colors">
+                            <button onClick={() => setNewPost({...newPost, tags: newPost.tags.filter(t => t !== tag)})} className="hover:text-red-500 transition-colors">
                               <X size={12} />
                             </button>
                           </span>
@@ -658,32 +643,31 @@ const SendiYouPage = () => {
                   </div>
 
                   {/* Live Preview */}
-                  <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(139,92,246,0.2)' }}>
-                    <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted" style={{ background: 'rgba(139,92,246,0.05)' }}>
+                  <div className="rounded-xl overflow-hidden lovable-card">
+                    <div className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-muted-gray)] bg-[rgba(28,28,28,0.03)] border-b border-[var(--color-border-passive)]">
                       LIVE PREVIEW
                     </div>
-                    <div className="p-4" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.05), rgba(168,85,247,0.05))' }}>
-                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full text-pink-400" style={{ background: 'rgba(236,72,153,0.12)' }}>SendiYou</span>
-                      <h4 className="font-bold text-text-primary mt-2 text-sm">{newPost.title || 'Your service title will appear here'}</h4>
+                    <div className="p-4 bg-[var(--color-cream)]">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md text-[var(--color-charcoal)] border border-[var(--color-border-passive)] bg-white">SendiYou</span>
+                      <h4 className="font-semibold text-[var(--color-charcoal)] mt-2 text-sm">{newPost.title || 'Your service title will appear here'}</h4>
                       <div className="flex items-center gap-2 mt-2">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)' }}>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[var(--color-charcoal)]">
                           {(newPost.display_name || profile.name).charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-text-primary">{newPost.display_name || profile.name}</p>
-                          <p className="text-[10px] text-text-muted">{profile.branch}</p>
+                          <p className="text-xs font-semibold text-[var(--color-charcoal)]">{newPost.display_name || profile.name}</p>
+                          <p className="text-[10px] text-[var(--color-muted-gray)]">{profile.branch}</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex gap-3">
-                    <button onClick={() => setStep(1)} className="flex-1 py-4 rounded-2xl font-bold text-text-secondary border border-slate-border/30 hover:bg-white/5 transition-all">
+                    <button onClick={() => setStep(1)} className="flex-1 lovable-button-ghost py-4 font-semibold text-base">
                       Back
                     </button>
                     <button onClick={() => { if (newPost.title.trim() && newPost.description.trim()) setStep(3); else alert('Please fill in title and description.'); }}
-                      className="flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-white transition-all"
-                      style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
+                      className="flex-1 lovable-button-primary py-4 font-semibold text-base flex justify-center">
                       Next: Animation <ChevronRight size={18} />
                     </button>
                   </div>
@@ -694,19 +678,19 @@ const SendiYouPage = () => {
               {step === 3 && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-semibold text-text-primary mb-2 flex items-center gap-2">
-                      <Heart size={16} className="text-pink-400" /> Select Animation <span className="text-pink-400">*</span>
+                    <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2 flex items-center gap-2">
+                      <Heart size={16} /> Select Animation <span className="text-red-500">*</span>
                     </label>
-                    <p className="text-text-muted text-sm mb-4">Choose an animation to represent your anonymous message.</p>
+                    <p className="text-[var(--color-muted-gray)] text-sm mb-4">Choose an animation to represent your anonymous message.</p>
                     
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                       {ANIMATIONS.map(anim => (
                         <button key={anim.id} type="button"
                           onClick={() => setNewPost({...newPost, selected_animation: anim.id})}
-                          className={`aspect-square rounded-xl flex items-center justify-center p-2 transition-all border-2 ${
+                          className={`aspect-square rounded-xl flex items-center justify-center p-2 transition-all border ${
                             newPost.selected_animation === anim.id
-                              ? 'border-pink-400 bg-pink-400/5 shadow-[0_0_15px_rgba(236,72,153,0.15)] scale-105'
-                              : 'border-slate-border/30 bg-slate-darker/50 hover:border-slate-border hover:bg-slate-deeper/50'
+                              ? 'border-[rgba(28,28,28,0.4)] bg-[rgba(28,28,28,0.04)] scale-105 shadow-[0_4px_12px_rgba(0,0,0,0.1)]'
+                              : 'border-[var(--color-border-passive)] bg-transparent hover:border-[rgba(28,28,28,0.2)] hover:bg-[rgba(28,28,28,0.02)]'
                           }`}>
                           <Lottie animationData={anim.data} loop={true} style={{ width: '100%', height: '100%' }} />
                         </button>
@@ -715,36 +699,35 @@ const SendiYouPage = () => {
                   </div>
 
                   {/* Final Preview */}
-                  <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(139,92,246,0.2)' }}>
-                    <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-text-muted" style={{ background: 'rgba(139,92,246,0.05)' }}>
+                  <div className="rounded-xl overflow-hidden lovable-card">
+                    <div className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-muted-gray)] bg-[rgba(28,28,28,0.03)] border-b border-[var(--color-border-passive)]">
                       FINAL PREVIEW
                     </div>
-                    <div className="p-5" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.06), rgba(168,85,247,0.06))' }}>
-                      <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full text-pink-400" style={{ background: 'rgba(236,72,153,0.12)' }}>SendiYou</span>
+                    <div className="p-5 bg-[var(--color-cream)]">
+                      <span className="px-2.5 py-0.5 text-[10px] font-semibold rounded-md text-[var(--color-charcoal)] bg-white border border-[var(--color-border-passive)]">SendiYou</span>
                       <div className="w-24 h-24 mx-auto my-4">
                         <Lottie animationData={getAnimData(newPost.selected_animation)} loop={true} />
                       </div>
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)' }}>
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white bg-[var(--color-charcoal)]">
                           {(newPost.display_name || profile.name).charAt(0).toUpperCase()}
                         </div>
-                        <p className="text-sm font-bold text-text-primary">{newPost.display_name || profile.name}</p>
+                        <p className="text-sm font-semibold text-[var(--color-charcoal)]">{newPost.display_name || profile.name}</p>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mb-2">
-                        <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-pink-500/10 text-pink-400">★ Preferred: {newPost.preferred_gender}</span>
-                        {newPost.is_anonymous && <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-violet-primary/10 text-violet-primary">🔒 Incognito</span>}
+                        <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">★ Preferred: {newPost.preferred_gender}</span>
+                        {newPost.is_anonymous && <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">🔒 Incognito</span>}
                       </div>
-                      <p className="text-text-secondary text-xs line-clamp-2">{newPost.description}</p>
+                      <p className="text-[var(--color-muted-gray)] text-xs line-clamp-2">{newPost.description}</p>
                     </div>
                   </div>
 
                   <div className="flex gap-3">
-                    <button onClick={() => setStep(2)} className="px-6 py-4 rounded-2xl font-bold text-text-secondary border border-slate-border/30 hover:bg-white/5 transition-all">
+                    <button onClick={() => setStep(2)} className="lovable-button-ghost py-4 font-semibold text-base px-6">
                       Back
                     </button>
                     <button onClick={handleCreatePost} disabled={creating}
-                      className="flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-white transition-all disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
-                      style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', boxShadow: '0 0 25px rgba(139,92,246,0.25)' }}>
+                      className="flex-1 lovable-button-primary py-4 font-semibold text-base flex justify-center disabled:opacity-50">
                       {creating ? 'Posting...' : <><Sparkles size={16} /> Post Service</>}
                     </button>
                   </div>

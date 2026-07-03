@@ -177,30 +177,30 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-12">
+    <div className="min-h-screen bg-[var(--color-cream)] pt-24 px-4 pb-12">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-violet-primary/10 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-violet-primary" />
+            <div className="w-12 h-12 rounded-xl bg-white border border-[var(--color-border-passive)] flex items-center justify-center">
+              <MessageSquare className="w-6 h-6 text-[var(--color-charcoal)]" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold font-heading text-text-primary">Dashboard</h1>
-              <p className="text-text-muted mt-1">Manage your requests and conversations</p>
+              <h1 className="text-3xl font-semibold text-[var(--color-charcoal)]">Dashboard</h1>
+              <p className="text-[var(--color-muted-gray)] mt-1">Manage your requests and conversations</p>
             </div>
           </div>
           
           {/* Tabs */}
-          <div className="flex bg-slate-deeper p-1 rounded-xl border border-slate-border w-fit">
+          <div className="flex bg-[rgba(28,28,28,0.04)] p-1 rounded-xl border border-[var(--color-border-passive)] w-fit">
             <button 
               onClick={() => setActiveTab('chats')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'chats' ? 'bg-violet-primary text-white shadow-md' : 'text-text-muted hover:text-text-primary'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'chats' ? 'bg-white text-[var(--color-charcoal)] shadow-sm border border-[var(--color-border-passive)]' : 'text-[var(--color-muted-gray)] hover:text-[var(--color-charcoal)]'}`}
             >
               Active Chats ({chats.length})
             </button>
             <button 
               onClick={() => setActiveTab('posts')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'posts' ? 'bg-violet-primary text-white shadow-md' : 'text-text-muted hover:text-text-primary'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'posts' ? 'bg-white text-[var(--color-charcoal)] shadow-sm border border-[var(--color-border-passive)]' : 'text-[var(--color-muted-gray)] hover:text-[var(--color-charcoal)]'}`}
             >
               My Posts ({myPosts.length})
             </button>
@@ -210,17 +210,17 @@ export default function MessagesPage() {
         {activeTab === 'chats' && (
           <>
             {chats.length === 0 ? (
-              <div className="glass-card p-12 text-center border-slate-border border-dashed">
-                <div className="w-16 h-16 rounded-full bg-slate-deeper flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-text-muted" />
+              <div className="lovable-card p-12 text-center border-dashed border-2">
+                <div className="w-16 h-16 rounded-full bg-[rgba(28,28,28,0.04)] border border-[var(--color-border-passive)] flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-8 h-8 text-[var(--color-muted-gray)]" />
                 </div>
-                <h3 className="text-lg font-bold text-text-primary mb-2">No active conversations</h3>
-                <p className="text-text-muted text-sm max-w-md mx-auto">
+                <h3 className="text-lg font-semibold text-[var(--color-charcoal)] mb-2">No active conversations</h3>
+                <p className="text-[var(--color-muted-gray)] text-sm max-w-md mx-auto">
                   You haven't replied to any posts or received any replies to your posts yet.
                 </p>
                 <button
                   onClick={() => navigate('/sendiyou')}
-                  className="mt-6 px-6 py-2.5 bg-violet-primary hover:bg-violet-hover text-white rounded-lg font-medium transition-colors"
+                  className="mt-6 lovable-button-primary"
                 >
                   Explore SendiYou
                 </button>
@@ -231,39 +231,39 @@ export default function MessagesPage() {
                   <div 
                     key={chat.id}
                     onClick={() => navigate(`/chat/${chat.id}`)}
-                    className="glass-card p-5 cursor-pointer hover:border-violet-primary/50 transition-all hover:-translate-y-0.5 group flex flex-col sm:flex-row gap-4 sm:items-center justify-between"
+                    className="lovable-card p-5 cursor-pointer hover:border-[rgba(28,28,28,0.4)] transition-all group flex flex-col sm:flex-row gap-4 sm:items-center justify-between"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-deeper text-text-secondary border border-slate-border">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
                           {getConnectionIcon(chat.post?.connection_type)}
                           {chat.post?.connection_type}
                         </span>
-                        <span className="text-xs text-text-muted flex items-center gap-1">
+                        <span className="text-xs text-[var(--color-muted-gray)] flex items-center gap-1">
                           <Clock size={12} />
                           {new Date(chat.lastActivity).toLocaleDateString()}
                         </span>
                       </div>
                       
-                      <h3 className="text-lg font-bold text-text-primary truncate mb-1 group-hover:text-violet-primary transition-colors">
+                      <h3 className="text-lg font-semibold text-[var(--color-charcoal)] truncate mb-1 group-hover:text-[rgba(28,28,28,0.8)] transition-colors">
                         {chat.post?.title || 'Unknown Post'}
                       </h3>
                       
                       {chat.latestMessage ? (
-                        <p className="text-sm text-text-secondary truncate pr-8">
+                        <p className="text-sm text-[var(--color-muted-gray)] truncate pr-8">
                           {chat.latestMessage.sender_id === user.id ? 'You: ' : ''}
                           {chat.latestMessage.content}
                         </p>
                       ) : (
-                        <p className="text-sm text-text-muted italic">No messages yet. Start the conversation!</p>
+                        <p className="text-sm text-[var(--color-muted-gray)] italic">No messages yet. Start the conversation!</p>
                       )}
                     </div>
                     
-                    <div className="shrink-0 flex items-center gap-3 bg-slate-deeper/50 px-4 py-2 rounded-xl border border-slate-border/50">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${chat.isRevealed ? 'bg-emerald-free/20 text-emerald-free' : 'bg-slate-card text-text-muted border border-slate-border'}`}>
+                    <div className="shrink-0 flex items-center gap-3 bg-[rgba(28,28,28,0.03)] px-4 py-2 rounded-xl border border-[var(--color-border-passive)]">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${chat.isRevealed ? 'bg-white border border-[var(--color-border-passive)] text-[var(--color-charcoal)]' : 'bg-transparent text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]'}`}>
                         <User size={16} />
                       </div>
-                      <div className="text-sm font-semibold">
+                      <div className="text-sm font-medium text-[var(--color-charcoal)]">
                         {chat.isRevealed ? 'Identity Revealed' : 'Anonymous'}
                       </div>
                     </div>
@@ -277,17 +277,17 @@ export default function MessagesPage() {
         {activeTab === 'posts' && (
           <>
             {myPosts.length === 0 ? (
-              <div className="glass-card p-12 text-center border-slate-border border-dashed">
-                <div className="w-16 h-16 rounded-full bg-slate-deeper flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-text-muted" />
+              <div className="lovable-card p-12 text-center border-dashed border-2">
+                <div className="w-16 h-16 rounded-full bg-[rgba(28,28,28,0.04)] border border-[var(--color-border-passive)] flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-[var(--color-muted-gray)]" />
                 </div>
-                <h3 className="text-lg font-bold text-text-primary mb-2">No posts created</h3>
-                <p className="text-text-muted text-sm max-w-md mx-auto">
+                <h3 className="text-lg font-semibold text-[var(--color-charcoal)] mb-2">No posts created</h3>
+                <p className="text-[var(--color-muted-gray)] text-sm max-w-md mx-auto">
                   You haven't created any SendiYou requests yet.
                 </p>
                 <button
                   onClick={() => navigate('/sendiyou')}
-                  className="mt-6 px-6 py-2.5 bg-violet-primary hover:bg-violet-hover text-white rounded-lg font-medium transition-colors"
+                  className="mt-6 lovable-button-primary"
                 >
                   Create a Request
                 </button>
@@ -298,40 +298,40 @@ export default function MessagesPage() {
                   <div 
                     key={post.id} 
                     onClick={() => handlePostClick(post.id)}
-                    className="glass-card p-5 cursor-pointer hover:border-violet-primary/50 transition-all hover:-translate-y-0.5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between group"
+                    className="lovable-card p-5 cursor-pointer hover:border-[rgba(28,28,28,0.4)] transition-all flex flex-col sm:flex-row gap-4 sm:items-center justify-between group"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-deeper text-text-secondary border border-slate-border">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
                           {getConnectionIcon(post.connection_type)}
                           {post.connection_type}
                         </span>
-                        <span className="text-xs text-text-muted flex items-center gap-1">
+                        <span className="text-xs text-[var(--color-muted-gray)] flex items-center gap-1">
                           <Clock size={12} />
                           {new Date(post.created_at).toLocaleDateString()}
                         </span>
                         {post.is_anonymous && (
-                          <span className="text-[10px] bg-violet-primary/10 text-violet-primary px-2 py-0.5 rounded-full border border-violet-primary/20">Anonymous</span>
+                          <span className="text-[10px] bg-white text-[var(--color-charcoal)] border border-[var(--color-border-passive)] px-2 py-0.5 rounded-full">Anonymous</span>
                         )}
                       </div>
                       
-                      <h3 className="text-lg font-bold text-text-primary truncate mb-1 group-hover:text-violet-primary transition-colors">
+                      <h3 className="text-lg font-semibold text-[var(--color-charcoal)] truncate mb-1 group-hover:text-[rgba(28,28,28,0.8)] transition-colors">
                         {post.title}
                       </h3>
-                      <p className="text-sm text-text-secondary truncate pr-8">{post.description}</p>
+                      <p className="text-sm text-[var(--color-muted-gray)] truncate pr-8">{post.description}</p>
                     </div>
                     
                     <div className="shrink-0 flex items-center gap-3">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setEditingPost(post); }}
-                        className="p-2 bg-slate-border/50 hover:bg-violet-primary hover:text-white text-text-secondary rounded-xl transition-colors"
+                        className="p-2 lovable-button-ghost hover:bg-[rgba(28,28,28,0.05)] rounded-xl transition-colors"
                         title="Edit Post"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id); }}
-                        className="px-4 py-2 bg-red-busy/10 hover:bg-red-busy text-red-busy hover:text-white rounded-xl text-sm font-bold transition-colors"
+                        className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-sm font-medium transition-colors"
                       >
                         Delete Post
                       </button>
@@ -346,12 +346,12 @@ export default function MessagesPage() {
 
       {/* EDIT MODAL */}
       {editingPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingPost(null)}></div>
-          <div className="relative w-full max-w-lg bg-slate-deeper rounded-2xl border border-slate-border/50 shadow-2xl p-6 overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-text-primary">Edit Post</h2>
-              <button onClick={() => setEditingPost(null)} className="p-2 rounded-lg hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(28,28,28,0.4)] backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={() => setEditingPost(null)}></div>
+          <div className="relative w-full max-w-lg lovable-card p-6 overflow-hidden max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between mb-6 border-b border-[var(--color-border-passive)] pb-4">
+              <h2 className="text-xl font-semibold text-[var(--color-charcoal)]">Edit Post</h2>
+              <button onClick={() => setEditingPost(null)} className="p-2 rounded-lg text-[var(--color-muted-gray)] hover:text-[var(--color-charcoal)] transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -360,43 +360,43 @@ export default function MessagesPage() {
               {/* Locked Fields */}
               <div className="space-y-3 opacity-60 pointer-events-none">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Title</label>
-                  <input type="text" value={editingPost.title} readOnly className="w-full bg-slate-card border border-slate-border rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none" />
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-gray)] mb-2">Title</label>
+                  <input type="text" value={editingPost.title} readOnly className="w-full lovable-input cursor-not-allowed bg-transparent" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Connection Type</label>
-                    <input type="text" value={editingPost.connection_type} readOnly className="w-full bg-slate-card border border-slate-border rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none" />
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-gray)] mb-2">Connection Type</label>
+                    <input type="text" value={editingPost.connection_type} readOnly className="w-full lovable-input cursor-not-allowed bg-transparent" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Looking For</label>
-                    <input type="text" value={editingPost.preferred_gender} readOnly className="w-full bg-slate-card border border-slate-border rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none" />
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-gray)] mb-2">Looking For</label>
+                    <input type="text" value={editingPost.preferred_gender} readOnly className="w-full lovable-input cursor-not-allowed bg-transparent" />
                   </div>
                 </div>
               </div>
 
-              <div className="h-px bg-slate-border/50 my-2"></div>
+              <div className="h-px bg-[var(--color-border-passive)] my-2"></div>
 
               {/* Editable Fields */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Description <span className="text-pink-500">*</span></label>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-charcoal)] mb-2">Description <span className="text-red-500">*</span></label>
                 <textarea 
                   required
                   rows={4}
                   value={editingPost.description}
                   onChange={(e) => setEditingPost({...editingPost, description: e.target.value})}
-                  className="w-full bg-slate-card border border-slate-border rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-violet-primary/50 focus:ring-1 focus:ring-violet-primary/50 resize-none transition-all"
+                  className="w-full lovable-input resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Animation Pattern</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-charcoal)] mb-3">Animation Pattern</label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                   {ANIMATIONS.map((anim) => (
                     <div 
                       key={anim.id}
                       onClick={() => setEditingPost({...editingPost, selected_animation: anim.id})}
-                      className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all ${editingPost.selected_animation === anim.id ? 'border-violet-primary bg-violet-primary/10 shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'border-transparent bg-slate-card hover:bg-slate-border'}`}
+                      className={`cursor-pointer rounded-xl overflow-hidden border transition-all ${editingPost.selected_animation === anim.id ? 'border-[rgba(28,28,28,0.4)] bg-[rgba(28,28,28,0.04)] shadow-[0_4px_12px_rgba(0,0,0,0.1)]' : 'border-[var(--color-border-passive)] bg-transparent hover:border-[rgba(28,28,28,0.2)] hover:bg-[rgba(28,28,28,0.02)]'}`}
                     >
                       <div className="h-16 flex items-center justify-center p-2">
                         <Lottie animationData={anim.data} loop={true} />
@@ -409,8 +409,7 @@ export default function MessagesPage() {
               <button 
                 type="submit" 
                 disabled={updating}
-                className="w-full py-4 mt-4 rounded-xl font-bold text-white transition-all disabled:opacity-70"
-                style={{ background: 'linear-gradient(135deg, #8b5cf6, #ec4899)' }}
+                className="w-full mt-4 lovable-button-primary py-4 font-semibold text-base w-full flex justify-center disabled:opacity-50"
               >
                 {updating ? 'Saving changes...' : 'Save Changes'}
               </button>
