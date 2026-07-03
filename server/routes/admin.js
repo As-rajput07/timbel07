@@ -599,5 +599,117 @@ router.get('/class-slot-count/:classCode', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/admin/sendiyou/users
+ * Fetch all SendiYou users.
+ */
+router.get('/sendiyou/users', authMiddleware, async (req, res) => {
+  try {
+    const db = getSupabase();
+    const { data, error } = await db
+      .from('users')
+      .select('id, name, email, branch, enrollment_number, gender, created_at, is_suspended')
+      .order('created_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ users: data || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch SendiYou users' });
+  }
+});
+
+/**
+ * PUT /api/admin/sendiyou/users/:id/suspend
+ * Toggle user suspension
+ */
+router.put('/sendiyou/users/:id/suspend', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_suspended } = req.body;
+    
+    if (!id) return res.status(400).json({ error: 'User ID is required' });
+
+    const db = getSupabase();
+    const { data, error } = await db
+      .from('users')
+      .update({ is_suspended })
+      .eq('id', id)
+      .select();
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true, user: data[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update user suspension' });
+  }
+});
+
+/**
+ * DELETE /api/admin/sendiyou/users/:id
+ * Permanently delete a user from the database
+ */
+router.delete('/sendiyou/users/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'User ID is required' });
+
+    const db = getSupabase();
+    
+    // Delete from auth.users using admin api (this cascades to public.users, posts, chats, etc.)
+    const { data, error } = await db.auth.admin.deleteUser(id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+/**
+ * GET /api/admin/sendiyou/posts
+ * Fetch all active posts with creator info and their associated chats
+ */
+router.get('/sendiyou/posts', authMiddleware, async (req, res) => {
+  try {
+    const db = getSupabase();
+    const { data, error } = await db
+      .from('sendiyou_posts')
+      .select(`
+        *,
+        creator:users ( id, name, email, enrollment_number, is_suspended ),
+        chats:sendiyou_chats (*)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ posts: data || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
+/**
+ * DELETE /api/admin/sendiyou/posts/:id
+ * Delete a post
+ */
+router.delete('/sendiyou/posts/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Post ID is required' });
+
+    const db = getSupabase();
+    const { error } = await db.from('sendiyou_posts').delete().eq('id', id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete post' });
+  }
+});
+
 module.exports = router;
 

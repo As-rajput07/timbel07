@@ -4,6 +4,7 @@ import LottieLib from 'lottie-react'
 import ReactMarkdown from 'react-markdown'
 import assistantAnimation from '../assets/assistent.json'
 import loaderAnimation from '../assets/loder.json'
+import SendiyouAdminTab from '../components/SendiyouAdminTab'
 
 const Lottie = LottieLib.default || LottieLib;
 
@@ -488,6 +489,12 @@ export default function AdminPage() {
             onClick={() => setActiveTab('queries')}
           >
             Resolve Queries <span className="bg-red-busy text-white text-[10px] px-2 py-0.5 rounded-full">{issues.length > 0 ? issues.length : 0}</span>
+          </button>
+          <button
+            className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'sendiyou' ? 'border-b-2 border-emerald-free text-emerald-free' : 'text-text-muted hover:text-text-primary'}`}
+            onClick={() => setActiveTab('sendiyou')}
+          >
+            SendiYou Moderation
           </button>
         </div>
 
@@ -1287,6 +1294,12 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+        
+        {/* ══════════ SENDIYOU MODERATION TAB ══════════ */}
+        {activeTab === 'sendiyou' && (
+          <SendiyouAdminTab token={token} />
+        )}
+
       </div>
     </div>
   )

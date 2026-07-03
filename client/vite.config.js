@@ -4,6 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      'lottie-web': 'lottie-web/build/player/lottie_light.js',
+    },
+  },
   server: {
     proxy: {
       '/api': {

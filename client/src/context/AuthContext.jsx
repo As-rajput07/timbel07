@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (!error && data) {
         setProfile(data);

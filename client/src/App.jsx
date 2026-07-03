@@ -11,6 +11,8 @@ import AIAssistantWidget from './components/AIAssistantWidget'
 import SendiYouPage from './pages/SendiYouPage'
 import PostDetailPage from './pages/PostDetailPage'
 import ChatPage from './pages/ChatPage'
+import MessagesPage from './pages/MessagesPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -24,9 +26,10 @@ function App() {
           <Route path="/classes" element={<ClassTimetablePage />} />
           <Route path="/teachers" element={<TeacherStatusPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/sendiyou" element={<SendiYouPage />} />
-          <Route path="/sendiyou/post/:postId" element={<PostDetailPage />} />
-          <Route path="/chat/:chatId" element={<ChatPage />} />
+          <Route path="/sendiyou" element={<ProtectedRoute><SendiYouPage /></ProtectedRoute>} />
+          <Route path="/sendiyou/post/:postId" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
+          <Route path="/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>

@@ -3,13 +3,19 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, Building2, Bell } from 'lucide-react'
 import cosenLogo from '../assets/cosen_brand_logo.svg'
 import { useNotifications } from '../context/NotificationContext'
+import { useAuth } from '../context/AuthContext'
+import { isUniversityEmail } from '../utils/authUtils'
 
-const navLinks = [
+const baseNavLinks = [
   { name: 'Home', path: '/' },
   { name: 'Find Rooms', path: '/finder' },
   { name: 'Class Timetables', path: '/classes' },
   { name: 'Teacher Status', path: '/teachers' },
   { name: 'SendiYou 💌', path: '/sendiyou' },
+]
+
+const sendiyouLinks = [
+  { name: 'Messages 💬', path: '/messages' }
 ]
 
 export default function Navbar() {
@@ -18,6 +24,10 @@ export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+  const { user } = useAuth()
+  
+  const isUniUser = user && isUniversityEmail(user.email)
+  const navLinks = isUniUser ? [...baseNavLinks, ...sendiyouLinks] : baseNavLinks
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-card rounded-none border-x-0 border-t-0">
@@ -65,68 +75,70 @@ export default function Navbar() {
             </div>
 
             {/* Notification Bell */}
-            <div className="relative">
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors relative"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-                )}
-              </button>
-              
-              {/* Dropdown */}
-              {showNotifications && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                  <div className="absolute right-0 mt-3 w-80 bg-slate-card border border-slate-border/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
-                    style={{ background: '#0F172A', border: '1px solid rgba(139,92,246,0.25)' }}>
-                    <div className="p-3 border-b border-slate-border/50 flex justify-between items-center bg-slate-darker/50">
-                      <h3 className="font-bold text-sm text-text-primary">Notifications</h3>
-                      {unreadCount > 0 && (
-                        <button onClick={markAllAsRead} className="text-[11px] font-semibold text-violet-primary hover:text-violet-hover">
-                          Mark all as read
-                        </button>
-                      )}
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-6 text-center text-text-muted text-sm">
-                          No notifications yet.
-                        </div>
-                      ) : (
-                        notifications.map((notif) => (
-                          <div 
-                            key={notif.id}
-                            onClick={() => {
-                              markAsRead(notif.id);
-                              setShowNotifications(false);
-                              if (notif.link) navigate(notif.link);
-                            }}
-                            className={`p-3 border-b border-slate-border/30 hover:bg-white/5 cursor-pointer transition-colors ${!notif.is_read ? 'bg-violet-primary/5' : ''}`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="min-w-0 flex-1">
-                                <p className={`text-sm ${!notif.is_read ? 'text-text-primary font-semibold' : 'text-text-secondary'}`}>
-                                  {notif.content}
-                                </p>
-                                <p className="text-[10px] text-text-muted mt-1">
-                                  {new Date(notif.created_at).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
-                                </p>
-                              </div>
-                              {!notif.is_read && (
-                                <div className="w-2 h-2 rounded-full bg-violet-primary shrink-0 mt-1.5" />
-                              )}
-                            </div>
+            {isUniUser && (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors relative"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </button>
+                
+                {/* Dropdown */}
+                {showNotifications && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                    <div className="absolute right-0 mt-3 w-80 bg-slate-card border border-slate-border/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                      style={{ background: '#0F172A', border: '1px solid rgba(139,92,246,0.25)' }}>
+                      <div className="p-3 border-b border-slate-border/50 flex justify-between items-center bg-slate-darker/50">
+                        <h3 className="font-bold text-sm text-text-primary">Notifications</h3>
+                        {unreadCount > 0 && (
+                          <button onClick={markAllAsRead} className="text-[11px] font-semibold text-violet-primary hover:text-violet-hover">
+                            Mark all as read
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="p-6 text-center text-text-muted text-sm">
+                            No notifications yet.
                           </div>
-                        ))
-                      )}
+                        ) : (
+                          notifications.map((notif) => (
+                            <div 
+                              key={notif.id}
+                              onClick={() => {
+                                markAsRead(notif.id);
+                                setShowNotifications(false);
+                                if (notif.link) navigate(notif.link);
+                              }}
+                              className={`p-3 border-b border-slate-border/30 hover:bg-white/5 cursor-pointer transition-colors ${!notif.is_read ? 'bg-violet-primary/5' : ''}`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <p className={`text-sm ${!notif.is_read ? 'text-text-primary font-semibold' : 'text-text-secondary'}`}>
+                                    {notif.content}
+                                  </p>
+                                  <p className="text-[10px] text-text-muted mt-1">
+                                    {new Date(notif.created_at).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
+                                  </p>
+                                </div>
+                                {!notif.is_read && (
+                                  <div className="w-2 h-2 rounded-full bg-violet-primary shrink-0 mt-1.5" />
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </div>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button
