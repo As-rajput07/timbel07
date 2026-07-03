@@ -278,11 +278,11 @@ const SendiYouPage = () => {
               <form onSubmit={handleOnboardingSubmit} className="space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-text-primary mb-2">Full Name <span className="text-pink-400">*</span></label>
-                  <input type="text" required
-                    className="w-full bg-slate-darker/80 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-violet-primary/50 focus:ring-1 focus:ring-violet-primary/20 transition-all"
-                    value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Stargazer, Campus Foodie, Night Owl..." />
-                  <p className="text-text-muted text-xs mt-1.5">This is the name shown publicly (not your real name unless you want).</p>
+                  <input type="text" required readOnly
+                    className="w-full bg-slate-deeper/50 border border-slate-border/50 rounded-xl px-4 py-3.5 text-text-muted cursor-not-allowed focus:outline-none transition-all"
+                    value={formData.name}
+                    placeholder="Auto-captured from Google Account" />
+                  <p className="text-text-muted text-xs mt-1.5">This name is securely verified via your Google Account.</p>
                 </div>
 
                 <div>
