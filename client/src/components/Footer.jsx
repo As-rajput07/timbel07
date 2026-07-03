@@ -65,7 +65,7 @@ export default function Footer() {
               <a href="https://github.com/Ankitrajput07" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-800 text-text-muted hover:bg-gray-700 hover:text-white transition-all duration-300" title="GitHub">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.02c3.1-.34 6.36-1.53 6.36-6.36a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.8 3.2 6.1 6.3 6.4a4.8 4.8 0 0 0-1 2.9v5"/><path d="M9 20a4 4 0 0 1-5-1.5"/></svg>
               </a>
-              <a href="https://portfolio.cosen.online" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-800 text-text-muted hover:bg-indigo-500 hover:text-white transition-all duration-300" title="Developer Portfolio">
+              <a href="/contributors.html" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-800 text-text-muted hover:bg-indigo-500 hover:text-white transition-all duration-300" title="Contributors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
               </a>
             </div>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contributors — Timbel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;480;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f7f4ed;
+    --cream-surface:#f7f4ed;
+    --charcoal:#1c1c1c;
+    --charcoal-83: rgba(28,28,28,0.83);
+    --charcoal-82: rgba(28,28,28,0.82);
+    --charcoal-40: rgba(28,28,28,0.4);
+    --charcoal-04: rgba(28,28,28,0.04);
+    --charcoal-03: rgba(28,28,28,0.03);
+    --muted:#5f5f5d;
+    --border:#eceae4;
+    --off-white:#fcfbf8;
+    --ring-blue: rgba(59,130,246,0.5);
+    --focus-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
+    --inset-shadow: rgba(255,255,255,0.2) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset, rgba(0,0,0,0.05) 0px 1px 2px 0px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--charcoal);
+    font-family:"Figtree", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-weight:400;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;}
+
+  .wrap{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* Nav */
+  nav{
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 24px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .logo{
+    font-weight:600;
+    font-size:18px;
+    letter-spacing:-0.3px;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .logo-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--charcoal);
+    display:inline-block;
+  }
+  .btn{
+    font-family:inherit;
+    font-size:14px;
+    font-weight:400;
+    padding:8px 16px;
+    border-radius:6px;
+    cursor:pointer;
+    border:none;
+    transition:opacity .15s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+  }
+  .btn:active{opacity:0.8;}
+  .btn-ghost{
+    background:transparent;
+    color:var(--charcoal);
+    border:1px solid var(--charcoal-40);
+  }
+
+  /* Hero */
+  .hero{
+    padding:96px 24px 64px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-120px;
+    left:50%;
+    transform:translateX(-50%);
+    width:900px;
+    height:420px;
+    background:radial-gradient(ellipse at center, rgba(217,119,87,0.10), rgba(59,130,246,0.08) 40%, rgba(247,244,237,0) 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .eyebrow{
+    position:relative;
+    z-index:1;
+    display:inline-block;
+    font-size:14px;
+    color:var(--muted);
+    letter-spacing:0.02em;
+    border:1px solid var(--border);
+    padding:6px 14px;
+    border-radius:9999px;
+    margin-bottom:24px;
+  }
+  h1{
+    position:relative;
+    z-index:1;
+    font-size:60px;
+    font-weight:600;
+    line-height:1.05;
+    letter-spacing:-1.5px;
+    margin:0 0 20px;
+  }
+  .hero p{
+    position:relative;
+    z-index:1;
+    font-size:18px;
+    line-height:1.38;
+    color:var(--muted);
+    max-width:560px;
+    margin:0 auto;
+  }
+
+  /* Grid */
+  .section{
+    padding:32px 24px 128px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .grid > .card:nth-child(4),
+  .grid > .card:nth-child(5){
+    grid-column:span 1;
+  }
+
+  .card{
+    background:var(--cream-surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:32px 24px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:16px;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .card:hover{
+    border-color:var(--charcoal-40);
+    transform:translateY(-2px);
+  }
+
+  .avatar{
+    width:64px;
+    height:64px;
+    border-radius:9999px;
+    background:var(--charcoal);
+    color:var(--off-white);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:-0.3px;
+    flex-shrink:0;
+  }
+
+  .card .name{
+    font-size:20px;
+    font-weight:400;
+    line-height:1.25;
+    letter-spacing:-0.2px;
+    margin:0;
+  }
+  .card .role{
+    font-size:14px;
+    color:var(--muted);
+    margin:-10px 0 0;
+    font-weight:400;
+  }
+  .card .bio{
+    font-size:15px;
+    color:var(--charcoal-82);
+    margin:0;
+    line-height:1.5;
+  }
+
+  .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:2px;
+  }
+  .tag{
+    font-size:12px;
+    color:var(--charcoal-83);
+    background:var(--charcoal-04);
+    border-radius:9999px;
+    padding:4px 10px;
+  }
+
+  .socials{
+    display:flex;
+    gap:10px;
+    margin-top:auto;
+    padding-top:8px;
+  }
+  .social-btn{
+    width:34px;
+    height:34px;
+    border-radius:9999px;
+    background:var(--cream);
+    box-shadow:var(--inset-shadow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:var(--charcoal);
+    opacity:0.7;
+    transition:opacity .15s ease;
+  }
+  .social-btn:hover{opacity:1;}
+  .social-btn svg{width:16px;height:16px;}
+
+  /* Stats strip */
+  .stats{
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:56px 24px;
+  }
+  .stats-inner{
+    max-width:1200px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:32px;
+  }
+  .stat{
+    flex:1;
+    min-width:160px;
+  }
+  .stat .num{
+    font-size:48px;
+    font-weight:600;
+    letter-spacing:-1.2px;
+    margin:0 0 6px;
+  }
+  .stat .label{
+    font-size:15px;
+    color:var(--muted);
+    margin:0;
+  }
+
+  /* CTA footer */
+  .cta{
+    text-align:center;
+    padding:96px 24px 128px;
+  }
+  .cta h2{
+    font-size:36px;
+    font-weight:600;
+    letter-spacing:-0.9px;
+    margin:0 0 16px;
+  }
+  .cta p{
+    color:var(--muted);
+    font-size:16px;
+    margin:0 0 32px;
+  }
+  .btn-dark{
+    background:var(--charcoal);
+    color:var(--off-white);
+    box-shadow:var(--inset-shadow);
+    font-size:16px;
+    padding:10px 22px;
+  }
+
+  footer{
+    border-top:1px solid var(--border);
+    padding:32px 24px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  @media (max-width: 1024px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+    h1{font-size:48px;letter-spacing:-1.2px;}
+  }
+  @media (max-width: 640px){
+    .grid{grid-template-columns:1fr;}
+    h1{font-size:36px;letter-spacing:-0.9px;}
+    .hero{padding:64px 20px 40px;}
+    .stats-inner{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="/">
+      <img src="/cosen_brand_logo.svg" alt="Cosen Logo" style="height: 24px; margin-right: 4px;">
+      <span class="logo-dot" style="display:none;"></span>timbel
+    </a>
+    <a class="btn btn-ghost" href="/">Back to app</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="eyebrow">Team</span>
+  <h1>The people<br>behind Timbel</h1>
+  <p>A small team building Timbel — part of the Cosen ecosystem — one feature, one bug fix, and one late night at a time.</p>
+</section>
+
+<section class="section">
+  <div class="grid">
+
+    <div class="card">
+      <div class="avatar">AK</div>
+      <p class="name">Ankit Kumar</p>
+      <p class="role">Founder &amp; Full Stack Developer</p>
+      <p class="bio">Builds most of the product end-to-end — from database schema to the pixels you click on.</p>
+      <div class="tags"><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Supabase</span></div>
+      <div class="socials">
+        <a class="social-btn" href="#" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5v-1.75c-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.82c0 .28.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg>
+        </a>
+        <a class="social-btn" href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.11 1 2.5 1s2.48 1.12 2.48 2.5ZM.24 8.25h4.52V23H.24V8.25ZM8.5 8.25h4.33v2.02h.06c.6-1.13 2.08-2.33 4.28-2.33 4.57 0 5.42 3.01 5.42 6.92V23h-4.52v-6.98c0-1.66-.03-3.8-2.32-3.8-2.32 0-2.68 1.81-2.68 3.68V23H8.5V8.25Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="avatar">RS</div>
+      <p class="name">Riya Sharma</p>
+      <p class="role">UI / UX Designer</p>
+      <p class="bio">Shapes how Timbel looks and feels, from wireframes to the final micro-interactions.</p>
+      <div class="tags"><span class="tag">Figma</span><span class="tag">Design Systems</span></div>
+      <div class="socials">
+        <a class="social-btn" href="#" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5v-1.75c-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.82c0 .28.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg>
+        </a>
+        <a class="social-btn" href="#" aria-label="Dribbble">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.6 4.6a8.3 8.3 0 0 1 1.9 5.1c-.28-.06-3.1-.63-5.94-.27-.06-.15-.12-.3-.19-.46-.18-.42-.37-.83-.57-1.23 3.13-1.28 4.55-3.1 4.8-3.14ZM12 3.7c1.98 0 3.79.72 5.2 1.9-.2.29-1.5 2-4.5 3.13a34.6 34.6 0 0 0-3.16-4.7c.8-.22 1.62-.33 2.46-.33ZM7.9 4.4a33.2 33.2 0 0 1 3.17 4.66c-3.99 1.06-7.51 1.04-7.9 1.04A8.34 8.34 0 0 1 7.9 4.4ZM3.7 12v-.2c.36.01 4.5.06 8.75-1.2.24.47.47.94.68 1.42-.11.03-.23.07-.34.1-4.4 1.42-6.74 5.31-6.94 5.65A8.28 8.28 0 0 1 3.7 12Zm8.3 8.3a8.28 8.28 0 0 1-5.05-1.72c.16-.33 1.95-3.75 6.79-5.4l.06-.02c.87 2.26 1.24 4.16 1.34 4.72a8.3 8.3 0 0 1-3.14.42Zm4.9-1.34a34.6 34.6 0 0 0-1.24-4.5c2.62-.42 4.9.27 5.18.36a8.35 8.35 0 0 1-3.94 4.14Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="avatar">DV</div>
+      <p class="name">Dev Verma</p>
+      <p class="role">Backend Developer</p>
+      <p class="bio">Owns the APIs, payments, and infrastructure that keep Timbel running smoothly.</p>
+      <div class="tags"><span class="tag">Express</span><span class="tag">PostgreSQL</span><span class="tag">Razorpay</span></div>
+      <div class="socials">
+        <a class="social-btn" href="#" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5v-1.75c-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.82c0 .28.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg>
+        </a>
+        <a class="social-btn" href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.11 1 2.5 1s2.48 1.12 2.48 2.5ZM.24 8.25h4.52V23H.24V8.25ZM8.5 8.25h4.33v2.02h.06c.6-1.13 2.08-2.33 4.28-2.33 4.57 0 5.42 3.01 5.42 6.92V23h-4.52v-6.98c0-1.66-.03-3.8-2.32-3.8-2.32 0-2.68 1.81-2.68 3.68V23H8.5V8.25Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="avatar">PJ</div>
+      <p class="name">Priya Joshi</p>
+      <p class="role">Marketing &amp; Growth</p>
+      <p class="bio">Tells Timbel's story to students and campuses, and runs the outreach that brings people in.</p>
+      <div class="tags"><span class="tag">Content</span><span class="tag">Community</span></div>
+      <div class="socials">
+        <a class="social-btn" href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.4 8.44L23.3 22h-6.9l-5.4-6.9L4.8 22H1.7l7.9-9.03L1 2h7.1l4.9 6.3L18.9 2Zm-1.2 18.2h1.9L7.4 3.7H5.4l12.3 16.5Z"/></svg>
+        </a>
+        <a class="social-btn" href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.11 1 2.5 1s2.48 1.12 2.48 2.5ZM.24 8.25h4.52V23H.24V8.25ZM8.5 8.25h4.33v2.02h.06c.6-1.13 2.08-2.33 4.28-2.33 4.57 0 5.42 3.01 5.42 6.92V23h-4.52v-6.98c0-1.66-.03-3.8-2.32-3.8-2.32 0-2.68 1.81-2.68 3.68V23H8.5V8.25Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="avatar">SM</div>
+      <p class="name">Saanvi Mehta</p>
+      <p class="role">QA &amp; Support</p>
+      <p class="bio">Catches the bugs before students do, and answers every support ticket personally.</p>
+      <div class="tags"><span class="tag">Testing</span><span class="tag">Support</span></div>
+      <div class="socials">
+        <a class="social-btn" href="#" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5v-1.75c-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.82c0 .28.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg>
+        </a>
+        <a class="social-btn" href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.4 8.44L23.3 22h-6.9l-5.4-6.9L4.8 22H1.7l7.9-9.03L1 2h7.1l4.9 6.3L18.9 2Zm-1.2 18.2h1.9L7.4 3.7H5.4l12.3 16.5Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat"><p class="num">5</p><p class="label">Team members</p></div>
+    <div class="stat"><p class="num">2</p><p class="label">Products shipped</p></div>
+    <div class="stat"><p class="num">1</p><p class="label">University campus</p></div>
+    <div class="stat"><p class="num">100%</p><p class="label">Student-built</p></div>
+  </div>
+</div>
+
+<section class="cta">
+  <h2>Want to work with us?</h2>
+  <p>We're always open to students who want to build something real.</p>
+  <a class="btn btn-dark" href="#">Get in touch</a>
+</section>
+
+<footer>
+  © 2026 Timbel · Part of the Cosen ecosystem
+</footer>
+
+</body>
+</html>

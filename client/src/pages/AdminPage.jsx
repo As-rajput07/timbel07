@@ -678,23 +678,8 @@ export default function AdminPage() {
                         ) : (
                           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {slots.map((slot, idx) => (
-                              <div key={idx} className="glass-card p-4 border border-slate-border/50 hover:border-violet-primary/50 group relative overflow-hidden">
+                              <div key={idx} className="glass-card p-4 border border-slate-border/50 hover:border-violet-primary/50 group relative overflow-hidden flex flex-col h-full">
                                 
-                                {/* Admin Actions Overlay */}
-                                <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  {deleteConfirmId === slot.id ? (
-                                    <div className="bg-slate-deeper p-1.5 rounded-lg flex items-center gap-2 border border-red-busy/50 shadow-lg">
-                                      <button onClick={() => handleDeleteSlot(slot.id)} className="text-[10px] bg-red-busy text-white px-2 py-1 rounded font-bold">Sure?</button>
-                                      <button onClick={() => setDeleteConfirmId(null)} className="text-[10px] bg-slate-border text-white px-2 py-1 rounded font-bold">No</button>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <button onClick={() => { setSlotForm(slot); setShowEditModal(true); }} className="p-1.5 bg-violet-primary/80 hover:bg-violet-primary text-white rounded-md shadow-md transition-colors"><Edit3 size={14} /></button>
-                                      <button onClick={() => setDeleteConfirmId(slot.id)} className="p-1.5 bg-red-busy/80 hover:bg-red-busy text-white rounded-md shadow-md transition-colors"><Trash2 size={14} /></button>
-                                    </>
-                                  )}
-                                </div>
-
                                 <div className="flex justify-between items-start mb-3">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-deeper text-text-secondary border border-slate-border">
                                     {slot.start_time} - {slot.end_time}
@@ -704,19 +689,39 @@ export default function AdminPage() {
                                   </span>
                                 </div>
                                 
-                                <h3 className="text-sm font-bold text-text-primary mb-2 line-clamp-2 pr-12">
+                                <h3 className="text-sm font-bold text-text-primary mb-2 line-clamp-2">
                                   {slot.subject}
                                 </h3>
                                 
-                                <div className="flex items-center gap-3 text-xs text-text-muted mt-2">
+                                <div className="flex items-center gap-3 text-xs text-text-muted mt-1 mb-4">
                                   <span className="font-medium bg-slate-800 px-2 py-1 rounded text-white">{slot.room}</span>
                                   <span className="truncate">{slot.teacher}</span>
                                 </div>
-                                {slot.section && (
-                                  <div className="absolute bottom-3 right-3 text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                                    Sec {slot.section}
+
+                                <div className="mt-auto pt-3 border-t border-slate-border/30 flex items-center justify-between">
+                                  <div>
+                                    {slot.section && (
+                                      <div className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                        Sec {slot.section}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+
+                                  {/* Admin Actions */}
+                                  <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                                    {deleteConfirmId === slot.id ? (
+                                      <div className="bg-slate-deeper p-1.5 rounded-lg flex items-center gap-2 border border-red-busy/50 shadow-lg">
+                                        <button onClick={() => handleDeleteSlot(slot.id)} className="text-[10px] bg-red-busy text-white px-2 py-1 rounded font-bold">Sure?</button>
+                                        <button onClick={() => setDeleteConfirmId(null)} className="text-[10px] bg-slate-border text-white px-2 py-1 rounded font-bold">No</button>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <button onClick={() => { setSlotForm(slot); setShowEditModal(true); }} className="p-1.5 bg-violet-primary/80 hover:bg-violet-primary text-white rounded-md shadow-md transition-colors"><Edit3 size={14} /></button>
+                                        <button onClick={() => setDeleteConfirmId(slot.id)} className="p-1.5 bg-red-busy/80 hover:bg-red-busy text-white rounded-md shadow-md transition-colors"><Trash2 size={14} /></button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             ))}
                           </div>
