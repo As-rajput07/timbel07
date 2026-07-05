@@ -48,3 +48,39 @@ Today was focused on refining the user experience, customizing the AI integratio
 4. **ClassTimetablePage Loading State Miss**
    - **The Problem**: When replacing the `Loader2` spinners globally, `ClassTimetablePage` was missed because it was using a raw CSS spinner (`border-spin`) rather than the Lucide icon.
    - **The Fix**: Used `findstr` to search for "loading" text globally, found the exact file, and swapped the CSS spinner out for the `Lottie` animation.
+
+### 7. UI/UX Fixes for Admin Slot Management
+- **Mobile Responsiveness**: Updated the hover logic for Admin Actions (Edit/Delete buttons) on timetable slot cards so they are permanently visible on mobile devices, ensuring accessibility since mobile lacks a hover state.
+- **Visual Hierarchy Overhaul**: Redesigned the slot card layout (changed to `flex-col`) and moved the Admin Actions to the bottom of the card. This fixed a critical UI bug where the buttons were overlapping and hiding the session type badges (e.g., Lab, Lecture).
+- **Import Error Fix**: Resolved a runtime crash in the Resolved Queries section by fixing a missing `AlertTriangle` icon import from `lucide-react` in `AdminPage.jsx`.
+
+### 8. Massive Timetable Data Extraction & Integration
+- Handled the accurate extraction of over 15+ complex timetable images (including sections `CV5`, `ME5`, `IT5A/B`, `ITE5`, `MLAI` groups, `CB5`, `DS5`, and `CSE` groups).
+- Successfully parsed complex split-slots (where sections A and B had different labs simultaneously) and Saturday schedules.
+- Generated precise SQL `INSERT` queries for all extracted timetables to seamlessly populate the `timetable_slots` database.
+
+### 9. SendiYou: Anonymous Campus Connections
+- **Feature Overview**: Developed and integrated "SendiYou," an anonymous community platform for students. It allows users to post requests, find study partners, and connect via individual (1-on-1) or group chats while keeping their real identities private.
+- **Dynamic Onboarding & Verification**: Built a smooth onboarding flow that securely verifies student identities by auto-capturing names from Google Accounts and extracting enrollment numbers from email structures.
+- **Custom Post Animations**: Added a rich UI touch where users can select distinct Lottie animations (e.g., handshake, study, chill, pets) to represent their anonymous posts on the feed.
+- **Real-time Chatting**: Implemented a chat interface linking users from their posts directly into real-time, threaded messaging.
+
+## Project Structure & Architecture
+- **Frontend (Client)**: Organized under `client/src/`
+  - `components/`: Contains reusable UI widgets (e.g., `Navbar.jsx`, `ProtectedRoute.jsx`, `SendiyouAdminTab.jsx`).
+  - `context/`: Holds the `AuthContext.jsx` for global user state and Supabase session management.
+  - `pages/`: Page-level components (`AdminPage.jsx`, `SendiYouPage.jsx`, `ChatPage.jsx`, etc.).
+  - `assets/`: Stores raw assets, including `sendiyu_lottie` JSON animations and other media.
+- **Backend (Server)**: Organized under `server/`
+  - Runs Express.js to expose specific admin-level API routes (like `/api/admin/apply-ai-changes`).
+  - Contains core logic for Gemini AI integration via `@google/genai` (handling the intelligent timetable querying).
+
+## Technology Stack
+- **Frontend Framework**: React 19 + Vite
+- **Styling**: Tailwind CSS v4
+- **Routing**: React Router DOM (v7)
+- **Database & Auth**: Supabase (PostgreSQL + GoTrue Authentication)
+- **Backend Environment**: Node.js + Express.js
+- **Animations & Graphics**: Lottie React, Three.js (`@react-three/fiber`, `@react-three/drei`) for 3D elements.
+- **Icons & Markdown**: Lucide React for iconography, React-Markdown for rendering AI responses.
+- **AI Integration**: Google GenAI SDK (Gemini) for AI-driven timetable reporting and natural language querying.

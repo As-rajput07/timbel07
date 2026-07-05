@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Shield, Upload, CheckCircle, AlertCircle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search, Edit3, XCircle } from 'lucide-react'
+import { Shield, Upload, CheckCircle, AlertCircle, AlertTriangle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search, Edit3, XCircle } from 'lucide-react'
 import LottieLib from 'lottie-react'
 import ReactMarkdown from 'react-markdown'
 import assistantAnimation from '../assets/assistent.json'

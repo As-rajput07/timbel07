@@ -15,6 +15,7 @@ import {
 import cosenLogo from '../assets/cosen_brand_logo.svg'
 import Hero3D from '../components/Hero3D'
 import ParticleBackground from '../components/ParticleBackground'
+import ContributorsMarquee from '../components/ContributorsMarquee'
 
 /* ─── Mouse-tracking 3D tilt on the hero mockup ─── */
 function useTilt(strength = 12) {
@@ -738,6 +739,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════ CONTRIBUTORS ═══════════════════════════════ */}
+      <ContributorsMarquee />
 
       {/* ═══════════════════════════════ FINAL CTA ═══════════════════════════════ */}
       <section style={{ padding: '100px 24px', borderTop: '1px solid rgba(51,65,85,0.3)', textAlign: 'center', position: 'relative' }}>
