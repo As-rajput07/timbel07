@@ -528,12 +528,71 @@ export default function LandingPage() {
 
   // Start with a resting tilt that looks natural
   const [ready, setReady] = useState(false)
-  useEffect(() => { setTimeout(() => setReady(true), 100) }, [])
+  
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [isStandalone, setIsStandalone] = useState(false)
+
+  useEffect(() => {
+    setTimeout(() => setReady(true), 100)
+
+    // Check if already in standalone mode
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      setIsStandalone(true)
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null)
+      setIsStandalone(true)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null)
+    }
+  }
 
   const activeTilt = ready ? tilt : { x: 6, y: -10 }
 
   return (
     <div style={{ overflowX: 'hidden', background: 'transparent' }}>
+      {!isStandalone && deferredPrompt && (
+        <button
+          onClick={handleInstallClick}
+          style={{
+            position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)', zIndex: 1000,
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '12px 24px', background: 'rgba(15,23,42,0.85)',
+            border: '1px solid rgba(99,91,255,0.5)', borderRadius: 999,
+            color: '#F8FAFC', fontWeight: 700, fontSize: 14,
+            backdropFilter: 'blur(12px)', cursor: 'pointer',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(99,91,255,0.2)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,91,255,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15,23,42,0.8)' }}
+        >
+          <Zap size={16} color="#10B981" /> Download App
+        </button>
+      )}
+
       <ParticleBackground />
       
       <Hero3D />
