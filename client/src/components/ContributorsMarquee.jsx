@@ -5,7 +5,7 @@ const CONTRIBUTORS = [
     initials: 'AR', 
     name: 'Ankit Rajput', 
     role: 'Founder & Tech Lead',
-    image: 'https://res-console.cloudinary.com/dga14nmzn/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/YW5raXRfcmFqcHV0Ml9wemRlZXg=/template_primary'
+    image: 'https://res.cloudinary.com/dga14nmzn/image/upload/v1783225764/ankit_rajput2_pzdeex.png'
   },
   { 
     initials: 'VR', 
