@@ -6,6 +6,7 @@ const path = require('path');
 const adminRoutes = require('./routes/admin');
 const timetableRoutes = require('./routes/timetable');
 const chatRoutes = require('./routes/chat');
+const notificationsRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use('/api/admin', adminRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

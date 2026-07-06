@@ -16,6 +16,7 @@ import cosenLogo from '../assets/cosen_brand_logo.svg'
 import Hero3D from '../components/Hero3D'
 import ParticleBackground from '../components/ParticleBackground'
 import ContributorsMarquee from '../components/ContributorsMarquee'
+import PushNotificationManager from '../components/PushNotificationManager'
 
 /* ─── Mouse-tracking 3D tilt on the hero mockup ─── */
 function useTilt(strength = 12) {
@@ -812,14 +813,20 @@ export default function LandingPage() {
             <span style={{ background: 'linear-gradient(125deg, #635BFF, #10B981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>your free room?</span>
           </h2>
           <p style={{ fontSize: 16, color: '#64748B', marginBottom: 40 }}>1,797 class slots tracked. Open right now.</p>
-          <Link
-            to="/finder"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', background: '#635BFF', color: '#fff', borderRadius: 999, fontWeight: 600, fontSize: 16, textDecoration: 'none', boxShadow: '0 8px 30px rgba(99,91,255,0.25)', transition: 'all 0.25s ease', letterSpacing: '-0.02em' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(99,91,255,0.4)'; e.currentTarget.style.background = '#7C75FF' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,91,255,0.25)'; e.currentTarget.style.background = '#635BFF' }}
-          >
-            <Zap size={18} /> Find a Free Room Now <ArrowRight size={18} />
-          </Link>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Link
+              to="/finder"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 40px', background: '#635BFF', color: '#fff', borderRadius: 999, fontWeight: 600, fontSize: 16, textDecoration: 'none', boxShadow: '0 8px 30px rgba(99,91,255,0.25)', transition: 'all 0.25s ease', letterSpacing: '-0.02em' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(99,91,255,0.4)'; e.currentTarget.style.background = '#7C75FF' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,91,255,0.25)'; e.currentTarget.style.background = '#635BFF' }}
+            >
+              <Zap size={18} /> Find a Free Room Now <ArrowRight size={18} />
+            </Link>
+          </div>
+          
+          <div style={{ marginTop: 24 }}>
+            <PushNotificationManager />
+          </div>
         </div>
       </section>
     </div>

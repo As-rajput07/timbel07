@@ -8,11 +8,14 @@ export default defineConfig({
     react(), 
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'favicon.svg'],
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 // 5 MB
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       },
+      includeAssets: ['favicon.png', 'favicon.svg'],
       devOptions: {
         enabled: true,
         type: 'module',

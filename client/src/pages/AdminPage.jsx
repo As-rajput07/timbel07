@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Shield, Upload, CheckCircle, AlertCircle, AlertTriangle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search, Edit3, XCircle } from 'lucide-react'
+import { Shield, Upload, CheckCircle, AlertCircle, AlertTriangle, MessageSquare, Check, PlusCircle, ChevronDown, X, Trash2, Search, Edit3, XCircle, Bell } from 'lucide-react'
 import LottieLib from 'lottie-react'
 import ReactMarkdown from 'react-markdown'
 import assistantAnimation from '../assets/assistent.json'
@@ -495,6 +495,12 @@ export default function AdminPage() {
             onClick={() => setActiveTab('sendiyou')}
           >
             SendiYou Moderation
+          </button>
+          <button
+            className={`px-5 py-3 font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'notifications' ? 'border-b-2 border-violet-primary text-violet-primary' : 'text-text-muted hover:text-text-primary'}`}
+            onClick={() => setActiveTab('notifications')}
+          >
+            <Bell size={15} /> Notifications
           </button>
         </div>
 
@@ -1303,6 +1309,63 @@ export default function AdminPage() {
         {/* ══════════ SENDIYOU MODERATION TAB ══════════ */}
         {activeTab === 'sendiyou' && (
           <SendiyouAdminTab token={token} />
+        )}
+
+        {/* ══════════ PUSH NOTIFICATIONS TAB ══════════ */}
+        {activeTab === 'notifications' && (
+          <div className="glass-card p-6 border-violet-primary/30 bg-violet-primary/5">
+            <h3 className="text-xl font-bold text-violet-primary mb-2">Send Push Notification</h3>
+            <p className="text-sm text-text-muted mb-6">Broadcast a message to all users who have subscribed to timetable alerts.</p>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const title = e.target.title.value;
+              const body = e.target.body.value;
+              
+              const btn = e.target.submitBtn;
+              const originalText = btn.innerHTML;
+              btn.innerHTML = 'Sending...';
+              btn.disabled = true;
+
+              try {
+                const res = await fetch('/api/notifications/broadcast', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({ title, body })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  alert(data.message);
+                  e.target.reset();
+                } else {
+                  alert(data.error || 'Failed to send broadcast');
+                }
+              } catch(err) {
+                alert(err.message);
+              } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Notification Title</label>
+                <input name="title" required placeholder="e.g. Timetable Updated!" className="w-full bg-slate-deeper border border-slate-border rounded-lg px-4 py-3 text-text-primary focus:outline-none focus:border-violet-primary focus:ring-1 focus:ring-violet-primary" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1 uppercase tracking-wider">Notification Body</label>
+                <textarea name="body" required placeholder="e.g. The latest master timetable has been synced." rows="3" className="w-full bg-slate-deeper border border-slate-border rounded-lg px-4 py-3 text-text-primary focus:outline-none focus:border-violet-primary focus:ring-1 focus:ring-violet-primary resize-none"></textarea>
+              </div>
+              
+              <div className="flex justify-end pt-2">
+                <button type="submit" name="submitBtn" className="px-6 py-3 rounded-full bg-violet-primary text-white font-bold hover:bg-violet-hover transition-colors flex items-center gap-2 disabled:opacity-50">
+                  <Bell size={18} /> Broadcast Now
+                </button>
+              </div>
+            </form>
+          </div>
         )}
 
       </div>
