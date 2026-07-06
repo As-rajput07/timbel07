@@ -83,10 +83,24 @@ export default function AdminPage() {
   const [showEditTeacherDrop, setShowEditTeacherDrop] = useState(false)
   const [showEditClassCodeDrop, setShowEditClassCodeDrop] = useState(false)
 
+  // Push Notifications State
+  const [subCount, setSubCount] = useState(0)
+
   useEffect(() => {
     if (token && activeTab === 'queries') fetchIssues()
     if (token && (activeTab === 'class-timetables' || activeTab === 'manage-slots') && metadata.subjects.length === 0) fetchMetadata()
+    if (token && activeTab === 'notifications') fetchSubCount()
   }, [token, activeTab])
+
+  const fetchSubCount = async () => {
+    try {
+      const res = await fetch('/api/notifications/count', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (res.ok) setSubCount(data.count)
+    } catch (err) { console.error(err) }
+  }
 
   const fetchMetadata = async () => {
     setMetaLoading(true)
@@ -1314,7 +1328,12 @@ export default function AdminPage() {
         {/* ══════════ PUSH NOTIFICATIONS TAB ══════════ */}
         {activeTab === 'notifications' && (
           <div className="glass-card p-6 border-violet-primary/30 bg-violet-primary/5">
-            <h3 className="text-xl font-bold text-violet-primary mb-2">Send Push Notification</h3>
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-xl font-bold text-violet-primary">Send Push Notification</h3>
+              <div className="bg-violet-primary/20 border border-violet-primary/30 px-3 py-1.5 rounded-full text-violet-primary text-xs font-bold flex items-center gap-2">
+                <Bell size={14} /> {subCount} Subscribers
+              </div>
+            </div>
             <p className="text-sm text-text-muted mb-6">Broadcast a message to all users who have subscribed to timetable alerts.</p>
             
             <form onSubmit={async (e) => {

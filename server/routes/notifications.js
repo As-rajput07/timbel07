@@ -126,4 +126,25 @@ router.post('/broadcast', authenticateAdmin, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/notifications/count
+ * Admin endpoint to get total number of push subscriptions
+ */
+router.get('/count', authenticateAdmin, async (req, res) => {
+  try {
+    const { count, error } = await supabase
+      .from('push_subscriptions')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      return res.status(500).json({ error: 'Failed to fetch subscription count' });
+    }
+
+    res.status(200).json({ count: count || 0 });
+  } catch (err) {
+    console.error('Count error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
