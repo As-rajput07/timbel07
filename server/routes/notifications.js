@@ -6,11 +6,15 @@ const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // Setup web-push with VAPID keys
-webpush.setVapidDetails(
-  'mailto:cosen.hub@gmail.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:cosen.hub@gmail.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+} else {
+  console.warn('⚠️ VAPID keys are missing from environment variables. Push notifications will not work.');
+}
 
 // Auth middleware for admin endpoints
 const authenticateAdmin = (req, res, next) => {
