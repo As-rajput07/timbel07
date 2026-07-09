@@ -20,10 +20,16 @@ const CONTRIBUTORS = [
     image: 'https://res.cloudinary.com/dga14nmzn/image/upload/v1783226764/Screenshot_2026-07-05_101523_hyffrm.png'
   },
   { 
-    initials: 'PS', 
-    name: 'Priyamisha Singh', 
-    role: 'QA & Support',
-    image: 'https://res.cloudinary.com/dga14nmzn/image/upload/v1783227164/Screenshot_2026-07-05_102215_xi5gow.png'
+    initials: 'KM', 
+    name: 'Kshitij Muni', 
+    role: 'Contributor',
+    image: 'https://res.cloudinary.com/dga14nmzn/image/upload/v1783581518/kshitige_nfrb1d.jpg'
+  },
+  { 
+    initials: 'JV', 
+    name: 'Jeet Vyas', 
+    role: 'Contributor',
+    image: 'https://res.cloudinary.com/dga14nmzn/image/upload/v1783582166/un-non_sbkg1x.png'
   },
 ];
 
