@@ -26,6 +26,114 @@ function timeToMinutes(timeStr) {
 }
 
 /**
+ * Applies temporary orientation overrides for 16-18 July 2026.
+ */
+function applyOrientationOverrides(slots, addOrientationEvents = true) {
+  const now = new Date();
+  
+  // Cutoff is July 19, 2026. Before this, any request for THU, FRI, SAT gets overridden.
+  const cutoffDate = new Date(2026, 6, 19); 
+  if (now >= cutoffDate) {
+    return slots;
+  }
+
+  const transformedSlots = [];
+  const orientationRooms = ['C006', 'C007', 'C011', 'C012', 'C013'];
+  const overrideDays = ['THU', 'FRI', 'SAT'];
+
+  const queriedDays = slots.length > 0 ? [...new Set(slots.map(s => s.day))] : [];
+
+  // Add the all-day orientation events
+  if (addOrientationEvents) {
+    orientationRooms.forEach(room => {
+      overrideDays.forEach(day => {
+        if (queriedDays.includes(day)) {
+          transformedSlots.push({
+            room: room,
+            building: 'C',
+            day: day,
+            start_time: '08:00',
+            end_time: '16:15',
+            subject: '1st Year Orientation',
+            teacher: 'All Faculty',
+            session_type: 'Event',
+            program: 'B.Tech',
+            year: '1',
+            section: 'ALL',
+            class_code: 'Orientation',
+            is_override: true
+          });
+        }
+      });
+    });
+  }
+
+  // Map existing slots to new locations
+  for (const slot of slots) {
+    if (!overrideDays.includes(slot.day)) {
+      transformedSlots.push(slot);
+      continue;
+    }
+
+    const currentDay = slot.day;
+    // Strip ALL spaces, uppercase, replace O with 0
+    const normRoom = (slot.room || '').toUpperCase().replace(/O/g, '0').replace(/\s+/g, '');
+    let movedToRoom = null;
+
+    if (normRoom.includes('C006')) {
+      movedToRoom = 'B006';
+    } else if (normRoom.includes('C007')) {
+      if (currentDay === 'THU') {
+        movedToRoom = 'B012';
+      } else if (currentDay === 'FRI') {
+        const startMin = timeToMinutes(slot.start_time);
+        if (startMin !== null && startMin < timeToMinutes('12:35')) {
+          movedToRoom = 'BX201';
+        } else {
+          movedToRoom = 'B007';
+        }
+      } else if (currentDay === 'SAT') {
+        movedToRoom = 'B007';
+      }
+    } else if (normRoom.includes('C012')) {
+      if (currentDay === 'THU') {
+        movedToRoom = 'B007';
+      } else if (currentDay === 'FRI') {
+        const startMin = timeToMinutes(slot.start_time);
+        if (startMin !== null && startMin < timeToMinutes('09:50')) {
+          movedToRoom = 'B007';
+        } else {
+          movedToRoom = 'B012';
+        }
+      }
+    } else if (normRoom.includes('C013')) {
+      if (currentDay === 'THU') {
+        if (slot.start_time === '14:25') movedToRoom = 'C107';
+        else movedToRoom = 'CX203';
+      } else if (currentDay === 'FRI') {
+        if (slot.start_time === '14:25') movedToRoom = 'BX201';
+        else movedToRoom = 'CX203';
+      }
+    }
+
+    if (movedToRoom) {
+      const originalRoom = slot.room;
+      transformedSlots.push({
+        ...slot,
+        room: movedToRoom,
+        building: movedToRoom.match(/^([A-Z]+)/) ? movedToRoom.match(/^([A-Z]+)/)[1] : movedToRoom,
+        subject: `${slot.subject} (Transformed from ${originalRoom})`,
+        is_override: true
+      });
+    } else {
+      transformedSlots.push(slot);
+    }
+  }
+
+  return transformedSlots;
+}
+
+/**
  * GET /buildings
  * Fetch all unique building values from timetable_slots.
  * Uses .range() pagination to handle large datasets.
@@ -98,18 +206,21 @@ router.get('/rooms', async (req, res) => {
     const db = getSupabase();
 
     // Fetch all slots for the given building and day (with pagination)
-    const allSlots = [];
+    let allSlots = [];
     const pageSize = 1000;
     let from = 0;
     let hasMore = true;
 
     while (hasMore) {
-      const { data, error } = await db
+      let query = db
         .from('timetable_slots')
-        .select('*')
-        .eq('building', building)
-        .eq('day', day)
-        .range(from, from + pageSize - 1);
+        .select('*');
+        
+      if (day && day !== 'ALL') {
+        query = query.eq('day', day);
+      }
+      
+      const { data, error } = await query.range(from, from + pageSize - 1);
 
       if (error) {
         console.error('Error fetching rooms:', error);
@@ -128,6 +239,14 @@ router.get('/rooms', async (req, res) => {
       } else {
         from += pageSize;
       }
+    }
+
+    // Apply Orientation Overrides
+    allSlots = applyOrientationOverrides(allSlots, true);
+
+    // Now filter by building in memory so moved classes appear correctly
+    if (building && building !== 'ALL') {
+      allSlots = allSlots.filter(s => s.building === building);
     }
 
     // Group slots by room
@@ -377,8 +496,11 @@ router.get('/classes/:classCode', async (req, res) => {
       }
     }
 
+    // Apply overrides without generating orientation events for unrelated queries
+    let filteredSlots = applyOrientationOverrides(allSlots, false);
+
     // Sort slots by start_time
-    const sortedSlots = allSlots.sort((a, b) => {
+    const sortedSlots = filteredSlots.sort((a, b) => {
       const aMin = timeToMinutes(a.start_time) || 0;
       const bMin = timeToMinutes(b.start_time) || 0;
       return aMin - bMin;
@@ -494,8 +616,11 @@ router.get('/teachers/:name/status', async (req, res) => {
       }
     }
 
+    // Apply overrides without generating orientation events for unrelated queries
+    let filteredSlots = applyOrientationOverrides(allSlots, false);
+
     // Sort slots by start_time
-    const sortedSlots = allSlots.sort((a, b) => {
+    const sortedSlots = filteredSlots.sort((a, b) => {
       const aMin = timeToMinutes(a.start_time) || 0;
       const bMin = timeToMinutes(b.start_time) || 0;
       return aMin - bMin;
