@@ -708,4 +708,5 @@ router.get('/teachers/:name/status', async (req, res) => {
   }
 });
 
+router.applyOrientationOverrides = applyOrientationOverrides;
 module.exports = router;

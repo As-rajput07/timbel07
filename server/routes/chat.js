@@ -1,6 +1,8 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const { GoogleGenAI } = require('@google/genai');
+const timetableRouter = require('./timetable');
+const applyOrientationOverrides = timetableRouter.applyOrientationOverrides;
 
 const router = express.Router();
 
@@ -92,8 +94,20 @@ router.post('/ask', async (req, res) => {
       parts: [{ text: message }]
     });
 
+    const now = new Date();
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const currentDayStr = days[now.getDay()];
+    
+    const dynamicSystemPrompt = `${SYSTEM_PROMPT}
+
+CURRENT CONTEXT:
+- Today is: ${currentDayStr}
+- College standard slots are: 08:00-08:55, 08:55-09:50, 09:50-10:45, 10:45-11:40, 12:35-13:30, 13:30-14:25, 14:25-15:20.
+- If the user asks when a room is free today, figure out today's day from the context above, query the database for that day, compare the database results against the standard slots, and report which standard slots are empty.
+`;
+
     const config = {
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: dynamicSystemPrompt,
       tools: [{ functionDeclarations: [searchTimetableDeclaration] }]
     };
 
@@ -126,9 +140,15 @@ router.post('/ask', async (req, res) => {
         if (parsedClassCode) query = query.ilike('class_code', `%${parsedClassCode}%`);
         if (parsedSection) query = query.ilike('section', `%${parsedSection}%`);
         
-        const { data, error } = await query.limit(15);
+        const { data, error } = await query.limit(25);
         
-        const dbResults = error ? { error: 'Failed to fetch data from database' } : (data || []);
+        let dbResults = [];
+        if (error) {
+          dbResults = { error: 'Failed to fetch data from database' };
+        } else if (data) {
+          // Apply orientation overrides so the AI knows about the current changes (July 16-18)
+          dbResults = applyOrientationOverrides ? applyOrientationOverrides(data, true) : data;
+        }
         
         // Append the function call to contents
         contents.push({
@@ -152,7 +172,7 @@ router.post('/ask', async (req, res) => {
           model: 'gemini-2.5-flash',
           contents: contents,
           config: {
-            systemInstruction: SYSTEM_PROMPT,
+            systemInstruction: dynamicSystemPrompt,
             responseMimeType: "application/json"
           }
         });
