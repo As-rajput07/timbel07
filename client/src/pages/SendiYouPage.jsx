@@ -47,6 +47,8 @@ const SendiYouPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
+  const [modalStats, setModalStats] = useState(null);
+  const [loadingModalStats, setLoadingModalStats] = useState(false);
 
   // Create post modal states
   const [showModal, setShowModal] = useState(false);
@@ -111,12 +113,25 @@ const SendiYouPage = () => {
     }
   }, [user, profile, setProfile]);
 
+  // Fetch stats when a user profile modal is opened
+  useEffect(() => {
+    if (!selectedUserProfile?.id) { setModalStats(null); return; }
+    setLoadingModalStats(true);
+    setModalStats(null);
+    Promise.all([
+      supabase.from('sendiyou_posts').select('*', { count: 'exact', head: true }).eq('creator_id', selectedUserProfile.id),
+      supabase.from('sendiyou_chats').select('*', { count: 'exact', head: true }).contains('participant_ids', [selectedUserProfile.id])
+    ]).then(([postsRes, chatsRes]) => {
+      setModalStats({ posts: postsRes.count || 0, chats: chatsRes.count || 0 });
+    }).finally(() => setLoadingModalStats(false));
+  }, [selectedUserProfile]);
+
   const fetchPosts = async () => {
     setFetchingPosts(true);
     try {
       const { data, error } = await supabase
         .from('sendiyou_posts')
-        .select(`*, users ( name, gender, branch, custom_avatar_url, bio )`)
+        .select(`*, users ( id, name, gender, branch, custom_avatar_url, bio, email )`)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setPosts(data || []);
@@ -783,25 +798,50 @@ const SendiYouPage = () => {
             <button onClick={() => setSelectedUserProfile(null)} className="absolute top-4 right-4 z-10 text-[var(--color-muted-gray)] hover:text-[var(--color-charcoal)] transition-colors p-1 bg-white/50 rounded-full backdrop-blur-md">
               <X size={20} />
             </button>
-            <div className="h-32 w-full" style={{ background: `url(${DEFAULT_BANNER}) center/cover no-repeat` }}></div>
-            <div className="px-6 pb-6 pt-0 text-center relative -top-12">
-              <div className="w-24 h-24 mx-auto rounded-full border-4 border-[var(--color-cream)] overflow-hidden bg-white flex items-center justify-center text-3xl font-bold text-[var(--color-charcoal)] mb-3">
+            {/* Banner */}
+            <div className="h-28 w-full" style={{ background: `url(${DEFAULT_BANNER}) center/cover no-repeat` }}></div>
+
+            {/* Avatar + Info */}
+            <div className="px-6 pb-6 pt-0 text-center relative -top-10">
+              <div className="w-20 h-20 mx-auto rounded-full border-4 border-[var(--color-cream)] overflow-hidden bg-white flex items-center justify-center text-2xl font-bold text-[var(--color-charcoal)] mb-2">
                 {selectedUserProfile.custom_avatar_url ? (
                   <img src={selectedUserProfile.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   selectedUserProfile.name?.charAt(0).toUpperCase() || '?'
                 )}
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-charcoal)] mb-0.5">{selectedUserProfile.name}</h3>
-              <p className="text-[var(--color-muted-gray)] text-sm mb-2">{selectedUserProfile.branch || 'Campus Student'}</p>
-              
+              <h3 className="text-lg font-bold text-[var(--color-charcoal)] mb-0.5">{selectedUserProfile.name}</h3>
+              <p className="text-[var(--color-muted-gray)] text-xs mb-1">{selectedUserProfile.branch || 'Campus Student'}</p>
+              {selectedUserProfile.email && (
+                <p className="text-[var(--color-muted-gray)] text-xs mb-2 flex items-center justify-center gap-1">
+                  <span>✉️</span> {selectedUserProfile.email}
+                </p>
+              )}
+
               {/* Bio */}
               {selectedUserProfile.bio && (
                 <p className="text-[var(--color-charcoal)] text-sm mb-3 px-2 leading-relaxed italic opacity-80">&ldquo;{selectedUserProfile.bio}&rdquo;</p>
               )}
 
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(28,28,28,0.04)] rounded-full text-sm font-medium text-[var(--color-charcoal)] border border-[var(--color-border-passive)]">
+              {/* Gender Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[rgba(28,28,28,0.04)] rounded-full text-xs font-medium text-[var(--color-charcoal)] border border-[var(--color-border-passive)] mb-4">
                 {selectedUserProfile.gender === 'Male' ? '👨' : selectedUserProfile.gender === 'Female' ? '👩' : '🌈'} {selectedUserProfile.gender}
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3 border-t border-[var(--color-border-passive)] pt-4">
+                <div className="text-center">
+                  <p className="text-xl font-extrabold text-[var(--color-charcoal)]">
+                    {loadingModalStats ? '—' : modalStats?.posts ?? '—'}
+                  </p>
+                  <p className="text-[10px] font-semibold text-[var(--color-muted-gray)] uppercase tracking-wider">Posts</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-extrabold text-[var(--color-charcoal)]">
+                    {loadingModalStats ? '—' : modalStats?.chats ?? '—'}
+                  </p>
+                  <p className="text-[10px] font-semibold text-[var(--color-muted-gray)] uppercase tracking-wider">Conversations</p>
+                </div>
               </div>
             </div>
           </div>

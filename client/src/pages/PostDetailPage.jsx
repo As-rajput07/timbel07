@@ -36,17 +36,32 @@ const PostDetailPage = () => {
   const [connecting, setConnecting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
+  const [modalStats, setModalStats] = useState(null);
+  const [loadingModalStats, setLoadingModalStats] = useState(false);
 
   useEffect(() => {
     fetchPost();
   }, [postId]);
+
+  // Fetch stats when profile modal opens
+  useEffect(() => {
+    if (!selectedUserProfile?.id) { setModalStats(null); return; }
+    setLoadingModalStats(true);
+    setModalStats(null);
+    Promise.all([
+      supabase.from('sendiyou_posts').select('*', { count: 'exact', head: true }).eq('creator_id', selectedUserProfile.id),
+      supabase.from('sendiyou_chats').select('*', { count: 'exact', head: true }).contains('participant_ids', [selectedUserProfile.id])
+    ]).then(([postsRes, chatsRes]) => {
+      setModalStats({ posts: postsRes.count || 0, chats: chatsRes.count || 0 });
+    }).finally(() => setLoadingModalStats(false));
+  }, [selectedUserProfile]);
 
   const fetchPost = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('sendiyou_posts')
-        .select(`*, users ( name, gender, branch, custom_avatar_url, bio )`)
+        .select(`*, users ( id, name, gender, branch, custom_avatar_url, bio, email )`)
         .eq('id', postId)
         .single();
       if (error) throw error;
@@ -322,40 +337,62 @@ const PostDetailPage = () => {
             <Shield size={16} className="text-emerald-free shrink-0 mt-0.5" />
             <span>All chats are anonymous by default. Identities are only revealed when a user explicitly clicks "Reveal Identity" inside the chat.</span>
           </div>
-        </div>
-      </div>
+          {/* ═══ USER PROFILE MODAL ═══ */}
+          {selectedUserProfile && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[rgba(15,23,42,0.8)] backdrop-blur-sm" onClick={() => setSelectedUserProfile(null)}>
+              <div className="w-full max-w-sm bg-slate-card rounded-2xl shadow-2xl overflow-hidden relative border border-slate-border/50" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setSelectedUserProfile(null)} className="absolute top-4 right-4 z-10 text-text-muted hover:text-text-primary transition-colors p-1 bg-white/10 rounded-full backdrop-blur-md">
+                  <X size={20} />
+                </button>
+                {/* Banner */}
+                <div className="h-28 w-full" style={{ background: `url(${DEFAULT_BANNER}) center/cover no-repeat` }}></div>
+                <div className="px-6 pb-6 pt-0 text-center relative -top-10">
+                  <div className="w-20 h-20 mx-auto rounded-full border-4 border-slate-card overflow-hidden bg-slate-deeper flex items-center justify-center text-2xl font-bold text-text-primary mb-2">
+                    {selectedUserProfile.custom_avatar_url ? (
+                      <img src={selectedUserProfile.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      selectedUserProfile.name?.charAt(0).toUpperCase() || '?'
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-text-primary mb-0.5">{selectedUserProfile.name}</h3>
+                  <p className="text-text-secondary text-xs mb-1">{selectedUserProfile.branch || 'Campus Student'}</p>
+                  {selectedUserProfile.email && (
+                    <p className="text-text-muted text-xs mb-2 flex items-center justify-center gap-1">
+                      <span>✉️</span> {selectedUserProfile.email}
+                    </p>
+                  )}
 
-      {/* ═══ USER PROFILE MODAL ═══ */}
-      {selectedUserProfile && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[rgba(15,23,42,0.8)] backdrop-blur-sm" onClick={() => setSelectedUserProfile(null)}>
-          <div className="w-full max-w-sm bg-slate-card rounded-2xl shadow-2xl overflow-hidden relative border border-slate-border/50" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setSelectedUserProfile(null)} className="absolute top-4 right-4 z-10 text-text-muted hover:text-text-primary transition-colors p-1 bg-white/10 rounded-full backdrop-blur-md">
-              <X size={20} />
-            </button>
-            <div className="h-32 w-full" style={{ background: `url(${DEFAULT_BANNER}) center/cover no-repeat` }}></div>
-            <div className="px-6 pb-6 pt-0 text-center relative -top-12">
-              <div className="w-24 h-24 mx-auto rounded-full border-4 border-slate-card overflow-hidden bg-slate-deeper flex items-center justify-center text-3xl font-bold text-text-primary mb-3">
-                {selectedUserProfile.custom_avatar_url ? (
-                  <img src={selectedUserProfile.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  selectedUserProfile.name?.charAt(0).toUpperCase() || '?'
-                )}
-              </div>
-              <h3 className="text-xl font-bold text-text-primary mb-0.5">{selectedUserProfile.name}</h3>
-              <p className="text-text-secondary text-sm mb-2">{selectedUserProfile.branch || 'Campus Student'}</p>
-              
-              {/* Bio */}
-              {selectedUserProfile.bio && (
-                <p className="text-text-muted text-sm mb-3 px-2 leading-relaxed italic">&ldquo;{selectedUserProfile.bio}&rdquo;</p>
-              )}
+                  {/* Bio */}
+                  {selectedUserProfile.bio && (
+                    <p className="text-text-muted text-sm mb-3 px-2 leading-relaxed italic">&ldquo;{selectedUserProfile.bio}&rdquo;</p>
+                  )}
 
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-deeper/50 rounded-full text-sm font-medium text-text-primary border border-slate-border/30">
-                {selectedUserProfile.gender === 'Male' ? '👨' : selectedUserProfile.gender === 'Female' ? '👩' : '🌈'} {selectedUserProfile.gender}
+                  {/* Gender Badge */}
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-deeper/50 rounded-full text-xs font-medium text-text-primary border border-slate-border/30 mb-4">
+                    {selectedUserProfile.gender === 'Male' ? '👨' : selectedUserProfile.gender === 'Female' ? '👩' : '🌈'} {selectedUserProfile.gender}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3 border-t border-slate-border/30 pt-4">
+                    <div className="text-center">
+                      <p className="text-xl font-extrabold text-text-primary">
+                        {loadingModalStats ? '—' : modalStats?.posts ?? '—'}
+                      </p>
+                      <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Posts</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-extrabold text-text-primary">
+                        {loadingModalStats ? '—' : modalStats?.chats ?? '—'}
+                      </p>
+                      <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Conversations</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
