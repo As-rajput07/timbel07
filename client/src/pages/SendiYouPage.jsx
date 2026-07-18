@@ -5,6 +5,8 @@ import { supabase } from '../supabaseClient';
 import { Heart, ChevronRight, Plus, X, Clock, MessageCircle, Eye, EyeOff, Star, ArrowRight, Sparkles, Search, LogOut, UserCircle } from 'lucide-react';
 import LottieLib from 'lottie-react';
 
+const DEFAULT_BANNER = 'https://res.cloudinary.com/dga14nmzn/image/upload/v1784358679/cosen_banner_wwpfb6.png';
+
 const Lottie = LottieLib.default || LottieLib;
 
 // Import all sendiyu lottie animations
@@ -44,6 +46,7 @@ const SendiYouPage = () => {
   const [fetchingPosts, setFetchingPosts] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
 
   // Create post modal states
   const [showModal, setShowModal] = useState(false);
@@ -93,12 +96,27 @@ const SendiYouPage = () => {
     }
   }, [user]);
 
+  // Auto-populate avatar + default banner for existing users if missing
+  useEffect(() => {
+    if (user && profile) {
+      const updates = {};
+      if (!profile.custom_avatar_url && user.user_metadata?.avatar_url)
+        updates.custom_avatar_url = user.user_metadata.avatar_url;
+      if (!profile.poster_url)
+        updates.poster_url = DEFAULT_BANNER;
+      if (Object.keys(updates).length > 0) {
+        supabase.from('users').update(updates).eq('id', user.id);
+        setProfile(prev => ({ ...prev, ...updates }));
+      }
+    }
+  }, [user, profile, setProfile]);
+
   const fetchPosts = async () => {
     setFetchingPosts(true);
     try {
       const { data, error } = await supabase
         .from('sendiyou_posts')
-        .select(`*, users ( name, gender, branch )`)
+        .select(`*, users ( name, gender, branch, custom_avatar_url, bio )`)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setPosts(data || []);
@@ -182,7 +200,16 @@ const SendiYouPage = () => {
     try {
       const { data, error: dbError } = await supabase
         .from('users')
-        .insert([{ id: user.id, email: user.email, name: formData.name, branch: formData.branch, enrollment_number: formData.enrollment_number, gender: formData.gender }])
+        .insert([{ 
+          id: user.id, 
+          email: user.email, 
+          name: formData.name, 
+          branch: formData.branch, 
+          enrollment_number: formData.enrollment_number, 
+          gender: formData.gender,
+          custom_avatar_url: user.user_metadata?.avatar_url || null,
+          poster_url: DEFAULT_BANNER
+        }])
         .select().single();
       if (dbError) throw dbError;
       setProfile(data);
@@ -436,9 +463,21 @@ const SendiYouPage = () => {
                   <div className="p-5">
                     {/* User info */}
                     <div className="flex items-center gap-2.5 mb-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 bg-white border border-[var(--color-border-passive)] text-[var(--color-charcoal)]">
-                        {post.is_anonymous && !post.display_name ? '?' : postDisplayName.charAt(0).toUpperCase()}
-                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!post.is_anonymous && post.users) setSelectedUserProfile(post.users);
+                        }}
+                        disabled={post.is_anonymous}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 bg-white border border-[var(--color-border-passive)] text-[var(--color-charcoal)] overflow-hidden ${!post.is_anonymous ? 'cursor-pointer hover:border-[rgba(28,28,28,0.4)]' : ''}`}>
+                        {post.is_anonymous ? (
+                          !post.display_name ? '?' : postDisplayName.charAt(0).toUpperCase()
+                        ) : post.users?.custom_avatar_url ? (
+                          <img src={post.users.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          postDisplayName.charAt(0).toUpperCase()
+                        )}
+                      </button>
                       <div>
                         <p className="text-sm font-semibold text-[var(--color-charcoal)] leading-tight">
                           {postDisplayName}
@@ -733,6 +772,37 @@ const SendiYouPage = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ═══ USER PROFILE MODAL ═══ */}
+      {selectedUserProfile && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[rgba(28,28,28,0.4)] backdrop-blur-sm" onClick={() => setSelectedUserProfile(null)}>
+          <div className="w-full max-w-sm bg-[var(--color-cream)] rounded-2xl shadow-2xl overflow-hidden relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedUserProfile(null)} className="absolute top-4 right-4 z-10 text-[var(--color-muted-gray)] hover:text-[var(--color-charcoal)] transition-colors p-1 bg-white/50 rounded-full backdrop-blur-md">
+              <X size={20} />
+            </button>
+            <div className="h-32 w-full" style={{ background: `url(${DEFAULT_BANNER}) center/cover no-repeat` }}></div>
+            <div className="px-6 pb-6 pt-0 text-center relative -top-12">
+              <div className="w-24 h-24 mx-auto rounded-full border-4 border-[var(--color-cream)] overflow-hidden bg-white flex items-center justify-center text-3xl font-bold text-[var(--color-charcoal)] mb-3">
+                {selectedUserProfile.custom_avatar_url ? (
+                  <img src={selectedUserProfile.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  selectedUserProfile.name?.charAt(0).toUpperCase() || '?'
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-[var(--color-charcoal)] mb-0.5">{selectedUserProfile.name}</h3>
+              <p className="text-[var(--color-muted-gray)] text-sm mb-2">{selectedUserProfile.branch || 'Campus Student'}</p>
+              
+              {/* Bio */}
+              {selectedUserProfile.bio && (
+                <p className="text-[var(--color-charcoal)] text-sm mb-3 px-2 leading-relaxed italic opacity-80">&ldquo;{selectedUserProfile.bio}&rdquo;</p>
+              )}
+
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(28,28,28,0.04)] rounded-full text-sm font-medium text-[var(--color-charcoal)] border border-[var(--color-border-passive)]">
+                {selectedUserProfile.gender === 'Male' ? '👨' : selectedUserProfile.gender === 'Female' ? '👩' : '🌈'} {selectedUserProfile.gender}
+              </div>
             </div>
           </div>
         </div>

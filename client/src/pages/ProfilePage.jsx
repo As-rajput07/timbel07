@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
-import { ArrowLeft, Edit3, Shield, Mail, Users, FileText, CheckCircle, LogOut, Camera, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit3, Shield, Mail, Users, FileText, CheckCircle, LogOut, Camera, Loader2, X, Save } from 'lucide-react';
+
+const DEFAULT_BANNER = 'https://res.cloudinary.com/dga14nmzn/image/upload/v1784358679/cosen_banner_wwpfb6.png';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -10,6 +12,9 @@ const ProfilePage = () => {
   
   const [stats, setStats] = useState({ totalPosts: 0, activeChats: 0 });
   const [loading, setLoading] = useState(true);
+  const [showBioModal, setShowBioModal] = useState(false);
+  const [bioInput, setBioInput] = useState('');
+  const [savingBio, setSavingBio] = useState(false);
   
   const posterInputRef = React.useRef(null);
   const avatarInputRef = React.useRef(null);
@@ -70,7 +75,25 @@ const ProfilePage = () => {
       return;
     }
     fetchStats();
+    // Set default banner if not set
+    if (profile && !profile.poster_url) {
+      supabase.from('users').update({ poster_url: DEFAULT_BANNER }).eq('id', user.id)
+        .then(() => setProfile(prev => ({ ...prev, poster_url: DEFAULT_BANNER })));
+    }
   }, [user, navigate]);
+
+  const handleSaveBio = async () => {
+    setSavingBio(true);
+    try {
+      await supabase.from('users').update({ bio: bioInput.trim() }).eq('id', user.id);
+      setProfile(prev => ({ ...prev, bio: bioInput.trim() }));
+      setShowBioModal(false);
+    } catch (e) {
+      console.error('Error saving bio:', e);
+    } finally {
+      setSavingBio(false);
+    }
+  };
 
   const fetchStats = async () => {
     setLoading(true);
@@ -125,7 +148,7 @@ const ProfilePage = () => {
       <div className="glass-card rounded-3xl overflow-hidden mb-6" style={{ background: '#0F172A', border: '1px solid rgba(51,65,85,0.4)' }}>
         {/* Cover / Header */}
         <div className="h-40 w-full relative group" style={{ 
-          background: profile.poster_url ? `url(${profile.poster_url}) center/cover no-repeat` : 'linear-gradient(135deg, rgba(99,91,255,0.2), rgba(16,185,129,0.2))' 
+          background: `url(${profile.poster_url || DEFAULT_BANNER}) center/cover no-repeat`
         }}>
           {/* Edit Cover Button */}
           <button onClick={() => posterInputRef.current?.click()} disabled={uploadingPoster}
@@ -166,9 +189,16 @@ const ProfilePage = () => {
               <p className="text-sm text-text-muted flex items-center gap-1 mt-1">
                 <Mail size={14} /> {user.email}
               </p>
+              {/* Bio */}
+              {profile.bio ? (
+                <p className="text-sm text-text-secondary mt-2 max-w-xs leading-relaxed">{profile.bio}</p>
+              ) : (
+                <p className="text-sm text-text-muted mt-2 italic opacity-60">No bio yet — add one!</p>
+              )}
             </div>
-            <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 border border-slate-border/50">
-              <Edit3 size={14} /> Edit Profile
+            <button onClick={() => { setBioInput(profile.bio || ''); setShowBioModal(true); }}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 border border-slate-border/50 shrink-0">
+              <Edit3 size={14} /> Edit Bio
             </button>
           </div>
 
@@ -228,6 +258,39 @@ const ProfilePage = () => {
         </button>
       </div>
 
+      {/* ═══ BIO EDIT MODAL ═══ */}
+      {showBioModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowBioModal(false)}>
+          <div className="w-full max-w-md bg-slate-card rounded-2xl shadow-2xl border border-slate-border/50 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-text-primary">Edit Bio</h3>
+              <button onClick={() => setShowBioModal(false)} className="text-text-muted hover:text-text-primary transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-xs text-text-muted mb-3">Write a short bio about yourself (max 150 characters). This will be visible on your public SendiYou profile.</p>
+            <textarea
+              value={bioInput}
+              onChange={e => setBioInput(e.target.value.slice(0, 150))}
+              placeholder="e.g. CSE student 🎓 | Coffee addict ☕ | Open to study connections"
+              rows={3}
+              className="w-full bg-slate-deeper border border-slate-border/50 rounded-xl p-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-violet-primary transition-colors"
+            />
+            <p className="text-xs text-text-muted text-right mt-1 mb-4">{bioInput.length}/150</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowBioModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-text-muted border border-slate-border/50 hover:bg-white/5 transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleSaveBio} disabled={savingBio}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-primary hover:bg-violet-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+                {savingBio ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {savingBio ? 'Saving...' : 'Save Bio'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

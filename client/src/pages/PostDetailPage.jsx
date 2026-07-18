@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
-import { ArrowLeft, MessageCircle, ArrowRight, Star, Clock, Eye, EyeOff, Shield, Users, User, Share2, Trash2 } from 'lucide-react';
+import { ArrowLeft, MessageCircle, ArrowRight, Star, Clock, Eye, EyeOff, Shield, Users, User, Share2, Trash2, X } from 'lucide-react';
 import LottieLib from 'lottie-react';
+
+const DEFAULT_BANNER = 'https://res.cloudinary.com/dga14nmzn/image/upload/v1784358679/cosen_banner_wwpfb6.png';
 
 const Lottie = LottieLib.default || LottieLib;
 
@@ -33,6 +35,7 @@ const PostDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
 
   useEffect(() => {
     fetchPost();
@@ -43,7 +46,7 @@ const PostDetailPage = () => {
     try {
       const { data, error } = await supabase
         .from('sendiyou_posts')
-        .select(`*, users ( name, gender, branch )`)
+        .select(`*, users ( name, gender, branch, custom_avatar_url, bio )`)
         .eq('id', postId)
         .single();
       if (error) throw error;
@@ -247,10 +250,19 @@ const PostDetailPage = () => {
           <div className="rounded-2xl p-5" style={{ background: '#0F172A', border: '1px solid rgba(51,65,85,0.4)' }}>
             <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">Posted By</h3>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
+              <button 
+                onClick={() => {
+                  if (!post.is_anonymous && post.users) setSelectedUserProfile(post.users);
+                }}
+                disabled={post.is_anonymous}
+                className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0 overflow-hidden ${!post.is_anonymous ? 'cursor-pointer hover:opacity-80' : ''}`}
                 style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', color: 'white' }}>
-                {post.is_anonymous ? '?' : displayName.charAt(0)}
-              </div>
+                {post.is_anonymous ? '?' : post.users?.custom_avatar_url ? (
+                  <img src={post.users.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  displayName.charAt(0).toUpperCase()
+                )}
+              </button>
               <div>
                 <p className="font-bold text-text-primary">{displayName}</p>
                 <p className="text-xs text-text-muted">{post.is_anonymous ? displayGender : displayBranch}</p>
@@ -312,6 +324,38 @@ const PostDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ═══ USER PROFILE MODAL ═══ */}
+      {selectedUserProfile && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[rgba(15,23,42,0.8)] backdrop-blur-sm" onClick={() => setSelectedUserProfile(null)}>
+          <div className="w-full max-w-sm bg-slate-card rounded-2xl shadow-2xl overflow-hidden relative border border-slate-border/50" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedUserProfile(null)} className="absolute top-4 right-4 z-10 text-text-muted hover:text-text-primary transition-colors p-1 bg-white/10 rounded-full backdrop-blur-md">
+              <X size={20} />
+            </button>
+            <div className="h-32 w-full" style={{ background: `url(${DEFAULT_BANNER}) center/cover no-repeat` }}></div>
+            <div className="px-6 pb-6 pt-0 text-center relative -top-12">
+              <div className="w-24 h-24 mx-auto rounded-full border-4 border-slate-card overflow-hidden bg-slate-deeper flex items-center justify-center text-3xl font-bold text-text-primary mb-3">
+                {selectedUserProfile.custom_avatar_url ? (
+                  <img src={selectedUserProfile.custom_avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  selectedUserProfile.name?.charAt(0).toUpperCase() || '?'
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-text-primary mb-0.5">{selectedUserProfile.name}</h3>
+              <p className="text-text-secondary text-sm mb-2">{selectedUserProfile.branch || 'Campus Student'}</p>
+              
+              {/* Bio */}
+              {selectedUserProfile.bio && (
+                <p className="text-text-muted text-sm mb-3 px-2 leading-relaxed italic">&ldquo;{selectedUserProfile.bio}&rdquo;</p>
+              )}
+
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-deeper/50 rounded-full text-sm font-medium text-text-primary border border-slate-border/30">
+                {selectedUserProfile.gender === 'Male' ? '👨' : selectedUserProfile.gender === 'Female' ? '👩' : '🌈'} {selectedUserProfile.gender}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
