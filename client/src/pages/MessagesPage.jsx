@@ -245,8 +245,13 @@ export default function MessagesPage() {
                         </span>
                       </div>
                       
-                      <h3 className="text-lg font-semibold text-[var(--color-charcoal)] truncate mb-1 group-hover:text-[rgba(28,28,28,0.8)] transition-colors">
+                      <h3 className="text-lg font-semibold text-[var(--color-charcoal)] truncate mb-1 group-hover:text-[rgba(28,28,28,0.8)] transition-colors flex items-center gap-2">
                         {chat.post?.title || 'Unknown Post'}
+                        {chat.post?.connection_type === 'Group' && (
+                          <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+                            <Users size={10} /> Group
+                          </span>
+                        )}
                       </h3>
                       
                       {chat.latestMessage ? (

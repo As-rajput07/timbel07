@@ -6,6 +6,7 @@ import { Heart, ChevronRight, Plus, X, Clock, MessageCircle, Eye, EyeOff, Star, 
 import LottieLib from 'lottie-react';
 
 const DEFAULT_BANNER = 'https://res.cloudinary.com/dga14nmzn/image/upload/v1784358679/cosen_banner_wwpfb6.png';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 const Lottie = LottieLib.default || LottieLib;
 
@@ -179,14 +180,29 @@ const SendiYouPage = () => {
 
   const handleStartChat = async (post) => {
     if (post.creator_id === user.id) {
-      alert("This is your own post!");
+      alert('This is your own post!');
       return;
     }
     if (post.preferred_gender !== 'Any' && post.preferred_gender !== profile?.gender) {
       alert(`This request is specifically looking for a ${post.preferred_gender}.`);
       return;
     }
+
     try {
+      // ── GROUP posts: backend assigns alias atomically ──────
+      if (post.connection_type === 'Group') {
+        const res = await fetch(`${API_BASE}/api/sendiyou/join-group`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_id: post.id, user_id: user.id }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to join group.');
+        navigate(`/chat/${data.chat_id}`);
+        return;
+      }
+
+      // ── INDIVIDUAL posts: original 1-on-1 flow ─────────────
       const { data: existingChats, error: searchError } = await supabase
         .from('sendiyou_chats').select('id')
         .eq('post_id', post.id)
@@ -198,13 +214,13 @@ const SendiYouPage = () => {
       }
       const { data: newChat, error: createError } = await supabase
         .from('sendiyou_chats')
-        .insert([{ post_id: post.id, participant_ids: [user.id, post.creator_id] }])
+        .insert([{ post_id: post.id, participant_ids: [user.id, post.creator_id], is_group: false }])
         .select().single();
       if (createError) throw createError;
       navigate(`/chat/${newChat.id}`);
     } catch (err) {
-      console.error("Error starting chat:", err);
-      alert("Failed to start chat.");
+      console.error('Error starting chat:', err);
+      alert(err.message || 'Failed to start chat.');
     }
   };
 
