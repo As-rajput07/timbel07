@@ -13,12 +13,14 @@ import PostDetailPage from './pages/PostDetailPage'
 import ChatPage from './pages/ChatPage'
 import MessagesPage from './pages/MessagesPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import PWANotificationPrompt from './components/PWANotificationPrompt'
 
 function App() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-darker">
       <Navbar />
       <AIAssistantWidget />
+      <PWANotificationPrompt />
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<LandingPage />} />
