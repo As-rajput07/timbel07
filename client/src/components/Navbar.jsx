@@ -91,7 +91,7 @@ export default function Navbar() {
                 {showNotifications && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                    <div className="absolute right-0 mt-3 w-80 bg-slate-card border border-slate-border/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                    <div className="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-3 sm:w-80 bg-slate-card border border-slate-border/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
                       style={{ background: '#0F172A', border: '1px solid rgba(139,92,246,0.25)' }}>
                       <div className="p-3 border-b border-slate-border/50 flex justify-between items-center bg-slate-darker/50">
                         <h3 className="font-bold text-sm text-text-primary">Notifications</h3>
