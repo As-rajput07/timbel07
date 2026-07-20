@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import {
   ArrowLeft, Send, Eye, ShieldAlert, Users, Lock,
-  Crown, Sparkles, X, ChevronRight, EyeOff, UserCheck,
+  Crown, Sparkles, X, ChevronRight, EyeOff, UserCheck, UserMinus,
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
@@ -238,6 +238,40 @@ const ChatPage = () => {
     }
   };
 
+  // ── kick member (creator only) ──────────────────────────────────────────────
+  const handleKickMember = async (targetMember) => {
+    const alias = targetMember.alias;
+    const realName = targetMember.is_revealed ? targetMember.users?.name : null;
+    const displayLabel = realName ? `${alias} (${realName})` : alias;
+
+    if (!window.confirm(`Are you sure you want to remove ${displayLabel} from this group?\n\nThis member will be permanently banned and cannot rejoin.`)) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/sendiyou/kick-member`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          user_id: user.id,
+          target_user_id: targetMember.user_id,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+
+      // Optimistic update
+      setMembers(prev => prev.filter(m => m.user_id !== targetMember.user_id));
+      setChatInfo(prev => ({
+        ...prev,
+        participant_ids: (prev.participant_ids || []).filter(id => id !== targetMember.user_id),
+      }));
+    } catch (err) {
+      alert(err.message || 'Failed to remove member.');
+    }
+  };
+
   // ── loading ─────────────────────────────────────────────────────────────────
   if (loading || !chatInfo) {
     return (
@@ -344,6 +378,20 @@ const ChatPage = () => {
             </div>
           )}
         </div>
+
+        {/* Kick button (creator only, not for self or creator) */}
+        {user.id === post?.creator_id && !isMe && !isCreator && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleKickMember(m);
+            }}
+            className="shrink-0 p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+            title="Remove from group"
+          >
+            <UserMinus size={14} />
+          </button>
+        )}
 
         {/* Arrow for revealed (clickable) */}
         {revealed && (

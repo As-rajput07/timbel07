@@ -199,7 +199,13 @@ const SendiYouPage = () => {
           body: JSON.stringify({ post_id: post.id, user_id: user.id }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to join group.');
+        if (!res.ok) {
+          if (data.suspended) {
+            alert('🚫 You have been suspended from this group by the admin. You cannot rejoin.');
+            return;
+          }
+          throw new Error(data.error || 'Failed to join group.');
+        }
         navigate(`/chat/${data.chat_id}`);
         return;
       }

@@ -125,12 +125,18 @@ router.post('/join-group', async (req, res) => {
     let chatId;
     const { data: existingChat } = await db
       .from('sendiyou_chats')
-      .select('id, participant_ids')
+      .select('id, participant_ids, banned_user_ids')
       .eq('post_id', post_id)
       .maybeSingle();
 
     if (existingChat) {
       chatId = existingChat.id;
+
+      // Check if user is banned
+      const bannedIds = existingChat.banned_user_ids || [];
+      if (bannedIds.includes(user_id)) {
+        return res.status(403).json({ error: 'You have been suspended from this group.', suspended: true });
+      }
 
       // Check capacity before adding
       const maxSize = post.max_group_size || 50;
@@ -287,6 +293,92 @@ router.get('/group-members/:chatId', async (req, res) => {
   } catch (err) {
     console.error('group-members error:', err);
     return res.status(500).json({ error: 'Failed to fetch group members.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/sendiyou/kick-member
+//   Body: { chat_id, user_id (requester), target_user_id }
+//   Only the group creator can kick members
+// ─────────────────────────────────────────────────────────
+router.post('/kick-member', async (req, res) => {
+  try {
+    const { chat_id, user_id, target_user_id } = req.body;
+    if (!chat_id || !user_id || !target_user_id) {
+      return res.status(400).json({ error: 'chat_id, user_id, and target_user_id are required.' });
+    }
+
+    const db = getSupabase();
+
+    // 1. Fetch chat + post to verify creator
+    const { data: chat, error: chatErr } = await db
+      .from('sendiyou_chats')
+      .select('id, participant_ids, banned_user_ids, revealed_ids, post_id, sendiyou_posts ( creator_id )')
+      .eq('id', chat_id)
+      .single();
+
+    if (chatErr || !chat) return res.status(404).json({ error: 'Chat not found.' });
+
+    const creatorId = chat.sendiyou_posts?.creator_id;
+    if (user_id !== creatorId) {
+      return res.status(403).json({ error: 'Only the group creator can remove members.' });
+    }
+
+    if (target_user_id === creatorId) {
+      return res.status(400).json({ error: 'You cannot remove yourself from the group.' });
+    }
+
+    // 2. Get the target member's alias for the system message
+    const { data: targetMember } = await db
+      .from('group_members')
+      .select('alias')
+      .eq('chat_id', chat_id)
+      .eq('user_id', target_user_id)
+      .maybeSingle();
+
+    const targetAlias = targetMember?.alias || 'A member';
+
+    // 3. Remove from participant_ids
+    const newParticipants = (chat.participant_ids || []).filter(id => id !== target_user_id);
+
+    // 4. Remove from revealed_ids
+    const newRevealedIds = (chat.revealed_ids || []).filter(id => id !== target_user_id);
+
+    // 5. Add to banned_user_ids
+    const bannedIds = [...(chat.banned_user_ids || [])];
+    if (!bannedIds.includes(target_user_id)) bannedIds.push(target_user_id);
+
+    // 6. Update chat record
+    await db
+      .from('sendiyou_chats')
+      .update({
+        participant_ids: newParticipants,
+        revealed_ids: newRevealedIds,
+        banned_user_ids: bannedIds,
+      })
+      .eq('id', chat_id);
+
+    // 7. Delete from group_members table
+    await db
+      .from('group_members')
+      .delete()
+      .eq('chat_id', chat_id)
+      .eq('user_id', target_user_id);
+
+    // 8. System message
+    await db
+      .from('messages')
+      .insert([{
+        chat_id,
+        sender_id: user_id,
+        content: `🚫 ${targetAlias} has been removed from the group by the admin.`,
+        type: 'SYSTEM',
+      }]);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('kick-member error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to remove member.' });
   }
 });
 
