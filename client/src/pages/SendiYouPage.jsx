@@ -131,9 +131,12 @@ const SendiYouPage = () => {
   const fetchPosts = async () => {
     setFetchingPosts(true);
     try {
+      // Get current date string to filter out expired posts
+      const now = new Date().toISOString();
       const { data, error } = await supabase
         .from('sendiyou_posts')
         .select(`*, users ( id, name, gender, branch, custom_avatar_url, bio, email )`)
+        .or(`expires_at.is.null,expires_at.gte.${now}`)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setPosts(data || []);
@@ -210,22 +213,15 @@ const SendiYouPage = () => {
         return;
       }
 
-      // ── INDIVIDUAL posts: original 1-on-1 flow ─────────────
-      const { data: existingChats, error: searchError } = await supabase
-        .from('sendiyou_chats').select('id')
-        .eq('post_id', post.id)
-        .contains('participant_ids', [user.id, post.creator_id]);
-      if (searchError) throw searchError;
-      if (existingChats && existingChats.length > 0) {
-        navigate(`/chat/${existingChats[0].id}`);
-        return;
-      }
-      const { data: newChat, error: createError } = await supabase
-        .from('sendiyou_chats')
-        .insert([{ post_id: post.id, participant_ids: [user.id, post.creator_id], is_group: false }])
-        .select().single();
-      if (createError) throw createError;
-      navigate(`/chat/${newChat.id}`);
+      // ── INDIVIDUAL posts: use new backend route ─────────────
+      const res = await fetch(`${API_BASE}/api/sendiyou/start-individual-chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: post.id, user_id: user.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to start chat.');
+      navigate(`/chat/${data.chat_id}`);
     } catch (err) {
       console.error('Error starting chat:', err);
       alert(err.message || 'Failed to start chat.');

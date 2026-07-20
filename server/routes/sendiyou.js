@@ -112,7 +112,7 @@ router.post('/join-group', async (req, res) => {
     // Fetch the post to confirm it's a Group type and get creator_id
     const { data: post, error: postErr } = await db
       .from('sendiyou_posts')
-      .select('id, creator_id, connection_type, preferred_gender, max_group_size')
+      .select('id, creator_id, connection_type, preferred_gender, max_group_size, expires_at')
       .eq('id', post_id)
       .single();
 
@@ -173,10 +173,79 @@ router.post('/join-group', async (req, res) => {
     // Ensure creator also has an alias
     await generateAlias(chatId, post.creator_id).catch(() => {});
 
+    // Set expiration for Group post if not already set (1 month)
+    if (!post.expires_at) {
+      const expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
+      await db.from('sendiyou_posts').update({ expires_at: expiryDate.toISOString() }).eq('id', post_id);
+    }
+
     return res.json({ chat_id: chatId, alias });
   } catch (err) {
     console.error('join-group error:', err);
     return res.status(500).json({ error: err.message || 'Failed to join group.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/sendiyou/start-individual-chat
+//   Body: { post_id, user_id }
+//   Returns: { chat_id }
+// ─────────────────────────────────────────────────────────
+router.post('/start-individual-chat', async (req, res) => {
+  try {
+    const { post_id, user_id } = req.body;
+    if (!post_id || !user_id) {
+      return res.status(400).json({ error: 'post_id and user_id are required.' });
+    }
+
+    const db = getSupabase();
+
+    // Fetch the post
+    const { data: post, error: postErr } = await db
+      .from('sendiyou_posts')
+      .select('id, creator_id, connection_type, expires_at')
+      .eq('id', post_id)
+      .single();
+
+    if (postErr || !post) return res.status(404).json({ error: 'Post not found.' });
+    if (post.connection_type !== 'Individual') {
+      return res.status(400).json({ error: 'This post is not an Individual connection.' });
+    }
+
+    // Check if chat exists
+    const { data: existingChats, error: searchError } = await db
+      .from('sendiyou_chats')
+      .select('id')
+      .eq('post_id', post_id)
+      .contains('participant_ids', [user_id, post.creator_id]);
+      
+    if (searchError) throw searchError;
+
+    let chatId;
+    if (existingChats && existingChats.length > 0) {
+      chatId = existingChats[0].id;
+    } else {
+      const { data: newChat, error: createError } = await db
+        .from('sendiyou_chats')
+        .insert([{ post_id: post.id, participant_ids: [user_id, post.creator_id], is_group: false }])
+        .select().single();
+        
+      if (createError) throw createError;
+      chatId = newChat.id;
+      
+      // Set expiration for Individual post if not already set (7 days)
+      if (!post.expires_at) {
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 7);
+        await db.from('sendiyou_posts').update({ expires_at: expiryDate.toISOString() }).eq('id', post_id);
+      }
+    }
+
+    return res.json({ chat_id: chatId });
+  } catch (err) {
+    console.error('start-individual-chat error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to start chat.' });
   }
 });
 
