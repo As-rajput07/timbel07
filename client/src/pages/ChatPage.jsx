@@ -200,25 +200,39 @@ const ChatPage = () => {
     }
   };
 
-  // ── reveal identity ─────────────────────────────────────────────────────────
-  const handleRevealIdentity = async () => {
-    const confirmMsg = isGroup
-      ? `Are you sure? Your real name will be permanently visible to ALL ${chatInfo.participant_ids.length} members.`
-      : 'Are you sure? Your name will be permanently visible to the other person.';
+  // ── toggle identity ─────────────────────────────────────────────────────────
+  const handleToggleIdentity = async (action) => {
+    const isRevealing = action === 'reveal';
+    const confirmMsg = isRevealing
+      ? (isGroup
+        ? `Are you sure? Your real name will be permanently visible to ALL ${chatInfo.participant_ids.length} members until you hide it.`
+        : 'Are you sure? Your name will be permanently visible to the other person until you hide it.')
+      : 'Are you sure you want to hide your identity? You will appear anonymous again.';
+      
     if (!window.confirm(confirmMsg)) return;
 
     setRevealing(true);
     try {
-      const res = await fetch(`${API_BASE}/api/sendiyou/reveal-identity`, {
+      const res = await fetch(`${API_BASE}/api/sendiyou/toggle-identity`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, user_id: user.id }),
+        body: JSON.stringify({ chat_id: chatId, user_id: user.id, action }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      setChatInfo(prev => ({ ...prev, revealed_ids: [...(prev.revealed_ids || []), user.id] }));
-      setMembers(prev => prev.map(m => m.user_id === user.id ? { ...m, is_revealed: true } : m));
+      
+      setChatInfo(prev => {
+        let newRevealedIds = [...(prev.revealed_ids || [])];
+        if (isRevealing) {
+          if (!newRevealedIds.includes(user.id)) newRevealedIds.push(user.id);
+        } else {
+          newRevealedIds = newRevealedIds.filter(id => id !== user.id);
+        }
+        return { ...prev, revealed_ids: newRevealedIds };
+      });
+      
+      setMembers(prev => prev.map(m => m.user_id === user.id ? { ...m, is_revealed: isRevealing } : m));
     } catch (err) {
-      alert('Failed to reveal identity.');
+      alert(`Failed to ${action} identity.`);
     } finally {
       setRevealing(false);
     }
@@ -395,21 +409,26 @@ const ChatPage = () => {
           </button>
         </div>
 
-        {/* Reveal / Revealed button */}
+        {/* Reveal / Hide button */}
         <div className="shrink-0">
           {!hasRevealed ? (
             <button
-              onClick={handleRevealIdentity}
+              onClick={() => handleToggleIdentity('reveal')}
               disabled={revealing}
-              className="px-3 py-2 bg-violet-primary/10 text-violet-primary text-xs font-bold rounded-lg hover:bg-violet-primary/20 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              className="px-3 py-2 bg-violet-primary/10 text-violet-primary text-xs font-bold rounded-lg hover:bg-violet-primary/20 transition-colors flex items-center gap-1.5 disabled:opacity-50 border border-violet-primary/20"
             >
               <Eye size={14} />
               {revealing ? 'Revealing…' : 'Show My Identity'}
             </button>
           ) : (
-            <div className="flex items-center gap-2 text-emerald-free text-xs font-bold bg-emerald-free/10 px-3 py-2 rounded-lg">
-              <ShieldAlert size={14} /> Identity Revealed
-            </div>
+            <button
+              onClick={() => handleToggleIdentity('hide')}
+              disabled={revealing}
+              className="flex items-center gap-2 text-emerald-free text-xs font-bold bg-emerald-free/10 hover:bg-emerald-free/20 px-3 py-2 rounded-lg transition-colors border border-emerald-free/20 disabled:opacity-50"
+            >
+              <EyeOff size={14} /> 
+              {revealing ? 'Hiding…' : 'Hide My Identity'}
+            </button>
           )}
         </div>
       </div>

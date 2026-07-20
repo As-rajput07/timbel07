@@ -171,17 +171,18 @@ router.post('/join-group', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────
-// POST /api/sendiyou/reveal-identity
-//   Body: { chat_id, user_id }
+// POST /api/sendiyou/toggle-identity
+//   Body: { chat_id, user_id, action: 'reveal' | 'hide' }
 //   Returns: { ok: true }
 // ─────────────────────────────────────────────────────────
-router.post('/reveal-identity', async (req, res) => {
+router.post('/toggle-identity', async (req, res) => {
   try {
-    const { chat_id, user_id } = req.body;
-    if (!chat_id || !user_id) {
-      return res.status(400).json({ error: 'chat_id and user_id are required.' });
+    const { chat_id, user_id, action } = req.body;
+    if (!chat_id || !user_id || !action) {
+      return res.status(400).json({ error: 'chat_id, user_id, and action are required.' });
     }
 
+    const isRevealing = action === 'reveal';
     const db = getSupabase();
 
     // 1. Get the member's alias + revealed status
@@ -194,10 +195,9 @@ router.post('/reveal-identity', async (req, res) => {
 
     if (memberErr) throw memberErr;
 
-    // For 1-on-1 chats there's no group_members record → fall through
     const alias = member?.alias || 'Anonymous';
 
-    if (member?.is_revealed) {
+    if (member && member.is_revealed === isRevealing) {
       return res.json({ ok: true, already: true });
     }
 
@@ -210,11 +210,11 @@ router.post('/reveal-identity', async (req, res) => {
 
     const realName = userRow?.name || 'Someone';
 
-    // 3. Mark as revealed in group_members
+    // 3. Update group_members
     if (member) {
       await db
         .from('group_members')
-        .update({ is_revealed: true })
+        .update({ is_revealed: isRevealing })
         .eq('chat_id', chat_id)
         .eq('user_id', user_id);
     }
@@ -226,28 +226,36 @@ router.post('/reveal-identity', async (req, res) => {
       .eq('id', chat_id)
       .single();
 
-    const newRevealedIds = [...(chatRow?.revealed_ids || [])];
-    if (!newRevealedIds.includes(user_id)) newRevealedIds.push(user_id);
+    let newRevealedIds = [...(chatRow?.revealed_ids || [])];
+    if (isRevealing) {
+      if (!newRevealedIds.includes(user_id)) newRevealedIds.push(user_id);
+    } else {
+      newRevealedIds = newRevealedIds.filter(id => id !== user_id);
+    }
 
     await db
       .from('sendiyou_chats')
       .update({ revealed_ids: newRevealedIds })
       .eq('id', chat_id);
 
-    // 5. Insert system message so everyone sees it in real-time
+    // 5. Insert system message
+    const msgContent = isRevealing
+      ? `🔓 ${alias} has revealed their identity as ${realName}`
+      : `🕵️ ${realName} has hidden their identity and is now ${alias}`;
+
     await db
       .from('messages')
       .insert([{
         chat_id,
         sender_id: user_id,
-        content: `🔓 ${alias} has revealed their identity as ${realName}`,
+        content: msgContent,
         type: 'SYSTEM',
       }]);
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error('reveal-identity error:', err);
-    return res.status(500).json({ error: err.message || 'Failed to reveal identity.' });
+    console.error('toggle-identity error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to toggle identity.' });
   }
 });
 
