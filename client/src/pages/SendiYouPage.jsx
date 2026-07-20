@@ -63,6 +63,7 @@ const SendiYouPage = () => {
     is_anonymous: true,
     selected_animation: 'anim7',
     tags: [],
+    max_group_size: 10,
   });
   const [tagInput, setTagInput] = useState('');
   const [creating, setCreating] = useState(false);
@@ -158,7 +159,8 @@ const SendiYouPage = () => {
           is_anonymous: newPost.is_anonymous,
           display_name: newPost.display_name,
           selected_animation: newPost.selected_animation,
-          tags: newPost.tags
+          tags: newPost.tags,
+          max_group_size: newPost.connection_type === 'Group' ? Math.min(50, Math.max(2, newPost.max_group_size)) : null,
         }])
         .select();
       if (error) throw error;
@@ -166,7 +168,7 @@ const SendiYouPage = () => {
       setStep(1);
       setNewPost({
         display_name: '', title: '', description: '', connection_type: 'Individual',
-        preferred_gender: 'Any', is_anonymous: true, selected_animation: 'anim7', tags: [],
+        preferred_gender: 'Any', is_anonymous: true, selected_animation: 'anim7', tags: [], max_group_size: 10,
       });
       setTagInput('');
       fetchPosts();
@@ -530,6 +532,11 @@ const SendiYouPage = () => {
                       <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
                         {post.connection_type}
                       </span>
+                      {post.connection_type === 'Group' && post.max_group_size && (
+                        <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-[rgba(28,28,28,0.04)] text-[var(--color-muted-gray)] border border-[var(--color-border-passive)]">
+                          👥 Max {post.max_group_size}
+                        </span>
+                      )}
                     </div>
 
                     {/* Title & Description */}
@@ -627,6 +634,37 @@ const SendiYouPage = () => {
                       ))}
                     </div>
                   </div>
+
+                  {/* ── Group Size Slider (Group only) ── */}
+                  {newPost.connection_type === 'Group' && (
+                    <div className="p-4 rounded-xl border border-[var(--color-border-passive)] bg-[rgba(28,28,28,0.02)]">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-medium text-[var(--color-charcoal)]">
+                          👥 Max Group Size
+                        </label>
+                        <span className="text-lg font-bold text-[var(--color-charcoal)] bg-[rgba(28,28,28,0.06)] px-3 py-1 rounded-lg min-w-[52px] text-center">
+                          {newPost.max_group_size}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={2}
+                        max={50}
+                        step={1}
+                        value={newPost.max_group_size}
+                        onChange={e => setNewPost({...newPost, max_group_size: Number(e.target.value)})}
+                        className="w-full accent-[#1c1c1c] cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-[var(--color-muted-gray)] mt-1.5">
+                        <span>Min: 2</span>
+                        <span className="text-center">Drag to set limit</span>
+                        <span>Max: 50</span>
+                      </div>
+                      <p className="text-[11px] text-[var(--color-muted-gray)] mt-2">
+                        Once the group reaches this limit, no new members can join.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Anonymous Toggle */}
                   <div>

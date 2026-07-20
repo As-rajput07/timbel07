@@ -112,7 +112,7 @@ router.post('/join-group', async (req, res) => {
     // Fetch the post to confirm it's a Group type and get creator_id
     const { data: post, error: postErr } = await db
       .from('sendiyou_posts')
-      .select('id, creator_id, connection_type, preferred_gender')
+      .select('id, creator_id, connection_type, preferred_gender, max_group_size')
       .eq('id', post_id)
       .single();
 
@@ -132,8 +132,12 @@ router.post('/join-group', async (req, res) => {
     if (existingChat) {
       chatId = existingChat.id;
 
-      // Add user to participant_ids if not already there
+      // Check capacity before adding
+      const maxSize = post.max_group_size || 50;
       if (!existingChat.participant_ids.includes(user_id)) {
+        if (existingChat.participant_ids.length >= maxSize) {
+          return res.status(400).json({ error: `This group is full (max ${maxSize} members).` });
+        }
         const newParticipants = [...existingChat.participant_ids, user_id];
         await db
           .from('sendiyou_chats')
